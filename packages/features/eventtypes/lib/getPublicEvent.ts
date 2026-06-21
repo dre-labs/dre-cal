@@ -111,6 +111,7 @@ export const getPublicEventSelect = (fetchAllUsers: boolean) => {
       select: {
         parentId: true,
         metadata: true,
+        hideBranding: true,
         brandColor: true,
         darkBrandColor: true,
         slug: true,
@@ -122,6 +123,7 @@ export const getPublicEventSelect = (fetchAllUsers: boolean) => {
           select: {
             slug: true,
             name: true,
+            hideBranding: true,
             bannerUrl: true,
             logoUrl: true,
             organizationSettings: {
