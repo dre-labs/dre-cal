@@ -1,11 +1,9 @@
-import { calendar_v3 } from "@googleapis/calendar";
-import { OAuth2Client, JWT } from "googleapis-common";
-
+import { getCredentialKey } from "@calcom/features/credentials/services/CredentialDataService";
 import { triggerDelegationCredentialErrorWebhook } from "@calcom/features/webhooks/lib/triggerDelegationCredentialErrorWebhook";
 import {
   CalendarAppDelegationCredentialClientIdNotAuthorizedError,
-  CalendarAppDelegationCredentialInvalidGrantError,
   CalendarAppDelegationCredentialError,
+  CalendarAppDelegationCredentialInvalidGrantError,
 } from "@calcom/lib/CalendarAppError";
 import {
   APP_CREDENTIAL_SHARING_ENABLED,
@@ -16,7 +14,8 @@ import {
 import logger from "@calcom/lib/logger";
 import type { Prisma } from "@calcom/prisma/client";
 import type { CredentialForCalendarServiceWithEmail } from "@calcom/types/Credential";
-
+import { calendar_v3 } from "@googleapis/calendar";
+import { JWT, OAuth2Client } from "googleapis-common";
 import { invalidateCredential } from "../../_utils/invalidateCredential";
 import { OAuthManager } from "../../_utils/oauth/OAuthManager";
 import { oAuthManagerHelper } from "../../_utils/oauth/oAuthManagerHelper";
@@ -71,7 +70,13 @@ export class CalendarAuth {
     }
     log.debug("Creating new oAuthClient");
     const { client_id, client_secret, redirect_uris } = await getGoogleAppKeys();
-    const googleCredentials = OAuth2UniversalSchema.parse(this.credential.key);
+    const googleCredentials = OAuth2UniversalSchema.parse(
+      getCredentialKey({
+        type: this.credential.type,
+        key: this.credential.key,
+        encryptedKey: this.credential.encryptedKey,
+      })
+    );
     this.oAuthClient = new MyGoogleOAuth2Client(client_id, client_secret, redirect_uris[0]);
     this.oAuthClient.setCredentials(googleCredentials);
     return this.oAuthClient;
@@ -216,7 +221,7 @@ export class CalendarAuth {
           statusText: result.statusText,
         });
       },
-      isTokenObjectUnusable: async function (response) {
+      isTokenObjectUnusable: async (response) => {
         // TODO: Confirm that if this logic should go to isAccessTokenUnusable
         if (!response.ok || (response.status < 200 && response.status >= 300)) {
           const responseBody = await response.json();
@@ -253,6 +258,7 @@ export class CalendarAuth {
 
         // Update cached credential as well
         this.credential.key = token as Prisma.JsonValue;
+        this.credential.encryptedKey = null;
       },
     });
     this.authManager = authManager;

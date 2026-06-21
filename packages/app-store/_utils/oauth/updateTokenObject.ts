@@ -1,13 +1,30 @@
-import type z from "zod";
-
 import { CredentialRepository } from "@calcom/features/credentials/repositories/CredentialRepository";
+import { buildCredentialKeyUpdateData } from "@calcom/features/credentials/services/CredentialDataService";
 import logger from "@calcom/lib/logger";
 import { prisma } from "@calcom/prisma";
 import type { Prisma } from "@calcom/prisma/client";
-
+import type z from "zod";
 import type { OAuth2UniversalSchemaWithCalcomBackwardCompatibility } from "./universalSchema";
 
 const log = logger.getSubLogger({ prefix: ["_utils", "oauth", "updateTokenObject"] });
+
+async function getCredentialType(credentialId: number) {
+  const credential = await prisma.credential.findUnique({
+    where: {
+      id: credentialId,
+    },
+    select: {
+      type: true,
+    },
+  });
+
+  if (!credential) {
+    throw new Error(`Credential ${credentialId} not found`);
+  }
+
+  return credential.type;
+}
+
 /**
  * @deprecated Use updateTokenObjectInDb instead
  */
@@ -18,12 +35,19 @@ export const updateTokenObject = async ({
   tokenObject: z.infer<typeof OAuth2UniversalSchemaWithCalcomBackwardCompatibility>;
   credentialId: number;
 }) => {
+  const credentialType = await getCredentialType(credentialId);
+  const keyUpdateData = buildCredentialKeyUpdateData({
+    type: credentialType,
+    key: tokenObject,
+  });
+
   await prisma.credential.update({
     where: {
       id: credentialId,
     },
     data: {
-      key: tokenObject as unknown as Prisma.InputJsonValue,
+      key: keyUpdateData.key as Prisma.InputJsonValue,
+      encryptedKey: keyUpdateData.encryptedKey,
     },
   });
 };
@@ -62,11 +86,17 @@ export const updateTokenObjectInDb = async (
       return;
     }
 
+    const keyUpdateData = buildCredentialKeyUpdateData({
+      type: credentialType,
+      key: tokenObject,
+    });
+
     const updated = await CredentialRepository.updateWhereUserIdAndDelegationCredentialId({
       userId,
       delegationCredentialId: delegatedToId,
       data: {
-        key: tokenObject as Prisma.InputJsonValue,
+        key: keyUpdateData.key as Prisma.InputJsonValue,
+        encryptedKey: keyUpdateData.encryptedKey,
       },
     });
 
@@ -77,16 +107,24 @@ export const updateTokenObjectInDb = async (
         userId,
         delegationCredentialId: delegatedToId,
         type: credentialType,
-        key: tokenObject as Prisma.InputJsonValue,
+        key: keyUpdateData.key as Prisma.InputJsonValue,
         appId,
+        encryptedKey: keyUpdateData.encryptedKey,
       });
     }
   } else {
     const { credentialId } = args;
+    const credentialType = await getCredentialType(credentialId);
+    const keyUpdateData = buildCredentialKeyUpdateData({
+      type: credentialType,
+      key: tokenObject,
+    });
+
     await CredentialRepository.updateWhereId({
       id: credentialId,
       data: {
-        key: tokenObject as Prisma.InputJsonValue,
+        key: keyUpdateData.key as Prisma.InputJsonValue,
+        encryptedKey: keyUpdateData.encryptedKey,
       },
     });
   }
