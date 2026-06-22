@@ -5,9 +5,9 @@ import { signOut } from "next-auth/react";
 import { Children, type ReactNode } from "react";
 import { Toaster } from "sonner";
 
+import { APP_NAME } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { Button } from "@calcom/ui/components/button";
-import { Logo } from "@calcom/ui/components/logo";
 
 type OnboardingLayoutProps = {
   userEmail: string;
@@ -30,9 +30,8 @@ export const OnboardingLayout = ({ userEmail, currentStep, totalSteps, children 
 
   return (
     <div className="bg-cal-muted flex min-h-screen w-full flex-col items-center justify-between overflow-clip rounded-[12px] px-4 py-2 md:px-6">
-      {/* Logo and container - centered */}
       <div className="flex w-full flex-1 flex-col items-center justify-center gap-6">
-        <Logo className="mt-4 h-5 w-auto shrink-0" />
+        <h1 className="mt-4 shrink-0 font-cal text-xl font-bold text-emphasis">{APP_NAME}</h1>
         <div className="border-subtle bg-default grid max-h-[690px] min-h-0 w-full max-w-[532px] flex-1 grid-cols-1 gap-12 overflow-auto rounded-2xl border px-4 py-2 sm:px-12 sm:py-10 xl:h-[690px] xl:max-w-[1130px] xl:grid-cols-[40%_1fr] xl:pl-10 xl:pr-0">
           {/* Column 1 - Always visible, 40% on xl+ */}
           <div className="flex h-full min-h-0 flex-col">{column1}</div>
