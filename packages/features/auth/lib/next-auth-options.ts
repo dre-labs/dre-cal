@@ -50,6 +50,7 @@ import EmailProvider from "next-auth/providers/email";
 import GoogleProvider from "next-auth/providers/google";
 import type { Provider } from "next-auth/providers/index";
 import { getOrgUsernameFromEmail } from "../signup/utils/getOrgUsernameFromEmail";
+import { isEmailAllowedForSignup } from "../signup/utils/isEmailAllowedForSignup";
 import { dub } from "./dub";
 import { ErrorCode } from "./ErrorCode";
 import CalComAdapter from "./next-auth-custom-adapter";
@@ -1102,6 +1103,14 @@ export const getOptions = ({
             },
           });
           return `/auth/error?error=wrong-provider&provider=${existingUserWithEmail.identityProvider}`;
+        }
+
+        if (!isEmailAllowedForSignup(user.email)) {
+          log.warn("callbacks:signIn - email domain is not allowed to create a new user", {
+            emailDomain: getDomainFromEmail(user.email),
+            provider: account.provider,
+          });
+          return "/auth/error?error=domain-not-allowed";
         }
 
         // Associate with organization if enabled by flag and idP is Google or Azure AD

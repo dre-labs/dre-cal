@@ -384,6 +384,7 @@
   "sign_in": "Sign in",
   "go_back_login": "Go back to the login page",
   "error_during_login": "An error occurred when logging you in. Head back to the login screen and try again.",
+  "domain_not_allowed_oauth_error": "This email domain is not allowed to sign up. Ask your team admin for an invite.",
   "request_password_reset": "Send reset email",
   "send_invite": "Send invite",
   "forgot_password": "Forgot password?",
