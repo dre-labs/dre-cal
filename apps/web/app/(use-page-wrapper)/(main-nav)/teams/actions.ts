@@ -44,8 +44,13 @@ const formNumber = (formData: FormData, key: string): number | null => {
   return value;
 };
 
-const redirectTo = (request: Request, path: string): NextResponse => {
-  return NextResponse.redirect(new URL(path, request.url), 303);
+// Build the redirect target from the configured app URL rather than request.url.
+// request.url can resolve to https behind proxies/dev setups, producing an
+// https://localhost link the dev server can't serve (ERR_SSL_PROTOCOL_ERROR).
+// Paths here are always absolute ("/teams/..."), so WEBAPP_URL fully determines
+// the destination with the correct scheme and host.
+const redirectTo = (_request: Request, path: string): NextResponse => {
+  return NextResponse.redirect(new URL(path, WEBAPP_URL), 303);
 };
 
 const redirectWithMessage = (
