@@ -86,6 +86,7 @@ export const TeamDetailsView = ({ userEmail, createTeam }: TeamDetailsViewProps)
             <Button
               type="submit"
               form="team-details-form"
+              data-testid="onboarding-continue-btn"
               color="primary"
               className="rounded-[10px]"
               loading={isCreating}

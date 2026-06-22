@@ -178,6 +178,7 @@ export const OnboardingView = ({ userEmail }: OnboardingViewProps) => {
                     <RadioAreaGroup.Item
                       key={plan.id}
                       value={plan.id}
+                      data-testid={`onboarding-plan-${plan.id}`}
                       className={classNames(
                         "relative flex items-center overflow-hidden rounded-[10px] border bg-default transition",
                         isSelected ? "border-emphasis shadow-sm" : "border-subtle",
