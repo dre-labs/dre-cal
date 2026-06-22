@@ -1,5 +1,9 @@
+import { randomBytes } from "node:crypto";
 import { DailyLocationType } from "@calcom/app-store/constants";
+import { sendTeamInviteEmail } from "@calcom/emails/organization-email-service";
 import { getServerSession } from "@calcom/features/auth/lib/getServerSession";
+import { getTranslation } from "@calcom/i18n/server";
+import { WEBAPP_URL } from "@calcom/lib/constants";
 import slugify from "@calcom/lib/slugify";
 import { prisma } from "@calcom/prisma";
 import type { Prisma } from "@calcom/prisma/client";
@@ -10,6 +14,8 @@ import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 const DEFAULT_EVENT_LOCATIONS: Prisma.InputJsonValue = [{ type: DailyLocationType }];
+
+const TEAM_INVITE_EXPIRATION_MS = 1000 * 60 * 60 * 24 * 7;
 
 type TeamAdminMembership = {
   id: number;
@@ -71,6 +77,88 @@ const requireTeamAdmin = async (teamId: number, userId: number): Promise<TeamAdm
         },
       },
     },
+  });
+};
+
+// Emails a signup link carrying a team-scoped verification token to someone who
+// doesn't have an account yet. We pre-create an invite stub user (no password,
+// unverified) plus a pending membership holding the chosen role, so signing up
+// through the link auto-joins the team with that role (createOrUpdateMemberships
+// flips the membership to accepted and preserves the role). The invitee skips
+// the team-creation onboarding step instead of being prompted to create a team.
+// `invitedTo` must be set or the token-based signup handler rejects the stub.
+const inviteNewTeamMemberByEmail = async ({
+  email,
+  teamId,
+  teamName,
+  role,
+  inviterId,
+}: {
+  email: string;
+  teamId: number;
+  teamName: string;
+  role: MembershipRole;
+  inviterId: number;
+}): Promise<void> => {
+  const token = randomBytes(32).toString("hex");
+  const [localPart] = email.split("@");
+  const fallbackUsername = `${slugify(localPart) || "member"}-${randomBytes(4).toString("hex")}`;
+
+  await prisma.$transaction(async (tx) => {
+    const invitedUser = await tx.user.upsert({
+      where: { email },
+      update: { invitedTo: teamId },
+      create: { email, username: fallbackUsername, invitedTo: teamId },
+      select: { id: true },
+    });
+
+    await tx.membership.upsert({
+      where: { userId_teamId: { userId: invitedUser.id, teamId } },
+      update: { role },
+      create: { userId: invitedUser.id, teamId, role, accepted: false },
+      select: { id: true },
+    });
+
+    // Drop any prior invite tokens for this email + team so only the newest link works.
+    await tx.verificationToken.deleteMany({ where: { identifier: email, teamId } });
+    await tx.verificationToken.create({
+      data: {
+        identifier: email,
+        token,
+        expires: new Date(Date.now() + TEAM_INVITE_EXPIRATION_MS),
+        team: {
+          connect: { id: teamId },
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+  });
+
+  const inviter = await prisma.user.findUnique({
+    where: { id: inviterId },
+    select: {
+      name: true,
+      email: true,
+    },
+  });
+
+  const translation = await getTranslation("en", "common");
+
+  await sendTeamInviteEmail({
+    language: translation,
+    from: inviter?.name || inviter?.email || teamName,
+    to: email,
+    teamName,
+    joinLink: `${WEBAPP_URL}/signup?token=${token}&callbackUrl=teams`,
+    isCalcomMember: false,
+    isAutoJoin: false,
+    isOrg: false,
+    parentTeamName: undefined,
+    isExistingUserMovedToOrg: false,
+    prevLink: null,
+    newLink: null,
   });
 };
 
@@ -140,6 +228,10 @@ export const addTeamMemberAction = async (request: Request): Promise<NextRespons
   }
 
   const email = formValue(formData, "email").toLowerCase();
+  if (!email) {
+    return redirectWithMessage(request, path, "error", "An email address is required.");
+  }
+
   const roleValue = formValue(formData, "role");
   let role: MembershipRole = MembershipRole.MEMBER;
   if (roleValue === MembershipRole.ADMIN) {
@@ -152,11 +244,28 @@ export const addTeamMemberAction = async (request: Request): Promise<NextRespons
     },
     select: {
       id: true,
+      emailVerified: true,
+      password: {
+        select: {
+          userId: true,
+        },
+      },
     },
   });
 
-  if (!user) {
-    return redirectWithMessage(request, path, "error", "No existing user was found for that email.");
+  // A "real" account has signed up (verified email or a password). Anyone else —
+  // no account, or a prior invite stub that hasn't completed signup — gets an
+  // email invite carrying the selected role. Real users are added immediately.
+  const hasAccount = !!user && (!!user.emailVerified || !!user.password);
+  if (!user || !hasAccount) {
+    await inviteNewTeamMemberByEmail({
+      email,
+      teamId,
+      teamName: membership.team.name,
+      role,
+      inviterId: userId,
+    });
+    return redirectWithMessage(request, path, "success", `Invitation sent to ${email}.`);
   }
 
   await prisma.membership.upsert({
