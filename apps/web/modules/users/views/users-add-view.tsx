@@ -28,27 +28,32 @@ export default function UsersAddView() {
   });
 
   return (
-    <UserForm
-      submitLabel="add"
-      onSubmit={(values: FormValues) => {
-        const data: Record<string, unknown> = {
-          name: values.name,
-          email: values.email,
-          username: values.username,
-          bio: values.bio,
-          timeZone: values.timeZone,
-          weekStart: values.weekStart?.value,
-          theme: values.theme,
-          defaultScheduleId: values.defaultScheduleId,
-          locale: values.locale?.value,
-          timeFormat: values.timeFormat?.value,
-          allowDynamicBooking: values.allowDynamicBooking,
-          identityProvider: values.identityProvider?.value,
-          role: values.role?.value,
-          avatarUrl: values.avatarUrl,
-        };
-        mutation.mutate(data as Parameters<typeof mutation.mutate>[0]);
-      }}
-    />
+    <>
+      <div className="mb-6 rounded-md border border-subtle bg-attention p-4 text-attention text-sm">
+        {t("admin_add_user_team_invite_notice")}
+      </div>
+      <UserForm
+        submitLabel="add"
+        onSubmit={(values: FormValues) => {
+          const data: Record<string, unknown> = {
+            name: values.name,
+            email: values.email,
+            username: values.username,
+            bio: values.bio,
+            timeZone: values.timeZone,
+            weekStart: values.weekStart?.value,
+            theme: values.theme,
+            defaultScheduleId: values.defaultScheduleId,
+            locale: values.locale?.value,
+            timeFormat: values.timeFormat?.value,
+            allowDynamicBooking: values.allowDynamicBooking,
+            identityProvider: values.identityProvider?.value,
+            role: values.role?.value,
+            avatarUrl: values.avatarUrl,
+          };
+          mutation.mutate(data as Parameters<typeof mutation.mutate>[0]);
+        }}
+      />
+    </>
   );
 }

@@ -2354,6 +2354,7 @@
   "admin_apps_description": "Enable apps for your instance of Cal",
   "admin_users_description": "A list of all the users in your account including their name, title, email and role.",
   "admin_users_add_description": "Here you can add a new user.",
+  "admin_add_user_team_invite_notice": "This creates a standalone account — no team and no invite email is sent. To onboard a teammate so they automatically join your team and skip team setup, use Teams → your team → Members → Add instead.",
   "admin_users_edit_description": "Here you can edit a current user.",
   "admin_orgs_edit_description": "Here you can edit an organization.",
   "admin_oAuth_description": "Add new OAuth clients",
