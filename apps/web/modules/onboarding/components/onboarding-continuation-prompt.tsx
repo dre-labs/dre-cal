@@ -1,12 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { Button } from "@calcom/ui/components/button";
 import { XIcon } from "@coss/ui/icons";
-
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useOnboardingStore } from "../store/onboarding-store";
 
 export const OnboardingContinuationPrompt = () => {
@@ -52,8 +50,7 @@ export const OnboardingContinuationPrompt = () => {
       // Organization flow: details -> brand -> teams -> invite
       router.push("/onboarding/organization/brand");
     } else if (entityType === "team") {
-      // Team flow: details -> invite
-      router.push("/onboarding/teams/invite");
+      router.push("/onboarding/teams/details");
     }
   };
 

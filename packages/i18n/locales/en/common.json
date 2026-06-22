@@ -4430,6 +4430,8 @@
   "onboarding_plan_personal_description": "Good for individuals who are just starting out and simply want the essentials.",
   "onboarding_plan_team_title": "With my team",
   "onboarding_plan_team_description": "Highly recommended for small teams who seek to upgrade their time and perform better as a unit.",
+  "onboarding_team_details_title": "Create your team",
+  "onboarding_team_details_subtitle": "Set up a shared space where you and your teammates can manage events together.",
   "onboarding_plan_organization_title": "For my organization",
   "onboarding_plan_team_badge": "$15/user/mo",
   "onboarding_plan_organization_badge": "$37/user/mo",
