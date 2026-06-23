@@ -12,6 +12,7 @@ import { buildLegacyRequest } from "@lib/buildLegacyCtx";
 import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { assertCanManageMember } from "./lib/teamMemberManagement";
 
 const DEFAULT_EVENT_LOCATIONS: Prisma.InputJsonValue = [{ type: DailyLocationType }];
 
@@ -408,4 +409,149 @@ export const createTeamEventAction = async (request: Request): Promise<NextRespo
   revalidatePath("/event-types");
   revalidatePath(`/team/${membership.team.slug}/${slug}`);
   return redirectTo(request, `/event-types/${eventType.id}?tabName=setup`);
+};
+
+const parseAssignableRole = (value: string): MembershipRole | null => {
+  if (value === MembershipRole.MEMBER) return MembershipRole.MEMBER;
+  if (value === MembershipRole.ADMIN) return MembershipRole.ADMIN;
+  if (value === MembershipRole.OWNER) return MembershipRole.OWNER;
+  return null;
+};
+
+const countTeamOwners = (teamId: number, client: typeof prisma | Prisma.TransactionClient = prisma) =>
+  client.membership.count({
+    where: { teamId, role: MembershipRole.OWNER, accepted: true },
+  });
+
+const revalidateTeam = (teamId: number, slug: string | null): void => {
+  revalidatePath(`/teams/${teamId}`);
+  revalidatePath("/event-types");
+  if (slug) revalidatePath(`/team/${slug}`);
+};
+
+export const updateTeamMemberRoleAction = async (request: Request): Promise<NextResponse> => {
+  const formData = await request.formData();
+  const userId = await getCurrentUserId();
+  if (!userId) return redirectTo(request, "/auth/login");
+
+  const teamId = formNumber(formData, "teamId");
+  if (!teamId) return redirectTo(request, "/teams");
+
+  const path = `/teams/${teamId}`;
+  const actor = await requireTeamAdmin(teamId, userId);
+  if (!actor) {
+    return redirectWithMessage(request, path, "error", "Only team owners and admins can manage members.");
+  }
+
+  const membershipId = formNumber(formData, "membershipId");
+  const newRole = parseAssignableRole(formValue(formData, "role"));
+  if (!membershipId || !newRole) {
+    return redirectWithMessage(request, path, "error", "Invalid member or role.");
+  }
+
+  const target = await prisma.membership.findFirst({
+    where: { id: membershipId, teamId },
+    select: { id: true, userId: true, role: true },
+  });
+  if (!target) {
+    return redirectWithMessage(request, path, "error", "Member not found.");
+  }
+
+  const ownerCount = await countTeamOwners(teamId);
+  const decision = assertCanManageMember({
+    actorRole: actor.role,
+    actorUserId: userId,
+    target,
+    ownerCount,
+    intent: { type: "setRole", newRole },
+  });
+  if (!decision.allowed) {
+    return redirectWithMessage(request, path, "error", decision.reason ?? "You can't manage this member.");
+  }
+
+  await prisma.membership.update({
+    where: { id: target.id },
+    data: { role: newRole },
+    select: { id: true },
+  });
+
+  revalidateTeam(teamId, actor.team.slug);
+  return redirectWithMessage(request, path, "success", "Member role updated.");
+};
+
+export const removeTeamMemberAction = async (request: Request): Promise<NextResponse> => {
+  const formData = await request.formData();
+  const userId = await getCurrentUserId();
+  if (!userId) return redirectTo(request, "/auth/login");
+
+  const teamId = formNumber(formData, "teamId");
+  if (!teamId) return redirectTo(request, "/teams");
+
+  const path = `/teams/${teamId}`;
+  const actor = await requireTeamAdmin(teamId, userId);
+  if (!actor) {
+    return redirectWithMessage(request, path, "error", "Only team owners and admins can manage members.");
+  }
+
+  const membershipId = formNumber(formData, "membershipId");
+  if (!membershipId) {
+    return redirectWithMessage(request, path, "error", "Missing member.");
+  }
+
+  const target = await prisma.membership.findFirst({
+    where: { id: membershipId, teamId },
+    select: { id: true, userId: true, role: true },
+  });
+  if (!target) {
+    return redirectWithMessage(request, path, "error", "Member not found.");
+  }
+
+  const ownerCount = await countTeamOwners(teamId);
+  const decision = assertCanManageMember({
+    actorRole: actor.role,
+    actorUserId: userId,
+    target,
+    ownerCount,
+    intent: { type: "remove" },
+  });
+  if (!decision.allowed) {
+    return redirectWithMessage(request, path, "error", decision.reason ?? "You can't remove this member.");
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      const teamEvents = await tx.eventType.findMany({ where: { teamId }, select: { id: true } });
+      const eventTypeIds = teamEvents.map((event) => event.id);
+
+      if (eventTypeIds.length) {
+        // Drop the member as a host of this team's events, and detach them from the legacy
+        // users relation that drives collective-event attendees. Scoped to this team only.
+        await tx.host.deleteMany({
+          where: { userId: target.userId, eventTypeId: { in: eventTypeIds } },
+        });
+        for (const eventTypeId of eventTypeIds) {
+          await tx.eventType.update({
+            where: { id: eventTypeId },
+            data: { users: { disconnect: { id: target.userId } } },
+            select: { id: true },
+          });
+        }
+      }
+
+      // Re-check inside the transaction so we never drop a team's last owner under a race.
+      if (target.role === MembershipRole.OWNER && (await countTeamOwners(teamId, tx)) <= 1) {
+        throw new Error("LAST_OWNER");
+      }
+
+      await tx.membership.delete({ where: { id: target.id } });
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === "LAST_OWNER") {
+      return redirectWithMessage(request, path, "error", "You can't remove the last owner of a team.");
+    }
+    throw error;
+  }
+
+  revalidateTeam(teamId, actor.team.slug);
+  return redirectWithMessage(request, path, "success", "Member removed from the team.");
 };

@@ -9,6 +9,7 @@ import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ShellMainAppDir } from "../../ShellMainAppDir";
+import { canManageMember, getAssignableRoles } from "../lib/teamMemberManagement";
 
 const Page = async ({ params, searchParams }: PageProps) => {
   const t = await getTranslate();
@@ -100,6 +101,9 @@ const Page = async ({ params, searchParams }: PageProps) => {
   }
 
   const canAdmin = membership.role === MembershipRole.ADMIN || membership.role === MembershipRole.OWNER;
+  const actorUserId = session.user.id;
+  const actorRole = membership.role;
+  const ownerCount = team.members.filter((member) => member.role === MembershipRole.OWNER).length;
   const success = typeof resolvedSearchParams.success === "string" ? resolvedSearchParams.success : null;
   const error = typeof resolvedSearchParams.error === "string" ? resolvedSearchParams.error : null;
   const teamUrl = `${WEBAPP_URL}/team/${team.slug}`;
@@ -241,17 +245,74 @@ const Page = async ({ params, searchParams }: PageProps) => {
             <section className="border-subtle bg-default rounded-md border p-5">
               <h2 className="text-emphasis text-base font-semibold">{t("members")}</h2>
               <div className="mt-4 space-y-3">
-                {team.members.map((member) => (
-                  <div key={member.id} className="flex items-start justify-between gap-3 text-sm">
-                    <div className="min-w-0">
-                      <p className="text-emphasis truncate font-medium">
-                        {member.user.name || member.user.email}
-                      </p>
-                      <p className="text-subtle truncate">{member.user.email}</p>
+                {team.members.map((member) => {
+                  const isSelf = member.user.id === actorUserId;
+                  const manageable =
+                    canAdmin &&
+                    canManageMember({
+                      actorRole,
+                      actorUserId,
+                      target: { userId: member.user.id, role: member.role },
+                      ownerCount,
+                    });
+                  const displayName = member.user.name || member.user.email;
+                  return (
+                    <div key={member.id} className="flex flex-col gap-2 text-sm">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-emphasis truncate font-medium">{displayName}</p>
+                          <p className="text-subtle truncate">{member.user.email}</p>
+                        </div>
+                        <span className="text-subtle shrink-0">
+                          {t(member.role.toLowerCase())}
+                          {isSelf ? ` · ${t("you")}` : ""}
+                        </span>
+                      </div>
+                      {manageable && (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <form
+                            action={`/teams/${team.id}/members/role`}
+                            method="post"
+                            className="flex items-center gap-2">
+                            <input type="hidden" name="teamId" value={team.id} />
+                            <input type="hidden" name="membershipId" value={member.id} />
+                            <select
+                              name="role"
+                              defaultValue={member.role}
+                              aria-label={`${t("role")} — ${displayName}`}
+                              className="border-subtle bg-default text-emphasis rounded-md border px-2 py-1 text-xs">
+                              {getAssignableRoles(actorRole).map((role) => (
+                                <option key={role} value={role}>
+                                  {t(role.toLowerCase())}
+                                </option>
+                              ))}
+                            </select>
+                            <button
+                              type="submit"
+                              className="border-subtle text-emphasis hover:bg-subtle rounded-md border px-3 py-1 text-xs font-medium">
+                              {t("update")}
+                            </button>
+                          </form>
+                          <details className="text-xs">
+                            <summary className="text-error hover:bg-subtle cursor-pointer rounded-md px-2 py-1">
+                              {t("remove")}
+                            </summary>
+                            <form action={`/teams/${team.id}/members/remove`} method="post" className="mt-2">
+                              <input type="hidden" name="teamId" value={team.id} />
+                              <input type="hidden" name="membershipId" value={member.id} />
+                              <button
+                                type="submit"
+                                aria-label={`${t("remove")} ${displayName}`}
+                                className="bg-error text-inverted hover:bg-error/90 rounded-md px-3 py-1 text-xs font-medium">
+                                {t("confirm")} · {t("remove")}
+                              </button>
+                            </form>
+                          </details>
+                        </div>
+                      )}
                     </div>
-                    <span className="text-subtle shrink-0">{member.role}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               {canAdmin && (
                 <form
