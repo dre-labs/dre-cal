@@ -1,9 +1,21 @@
+import type { CalendarEvent } from "@calcom/types/Calendar";
 import type { TFunction } from "i18next";
 import type { EventStatus } from "ics";
-
-import type { CalendarEvent } from "@calcom/types/Calendar";
-
 import generateIcsString from "./generateIcsString";
+
+type IcsMethod = "REQUEST" | "CANCEL";
+
+type IcsFile = {
+  filename: "event.ics";
+  content: string | undefined;
+  method: IcsMethod;
+};
+
+const getIcsMethod = (status: EventStatus): IcsMethod => {
+  if (status === "CANCELLED") return "CANCEL";
+
+  return "REQUEST";
+};
 
 export enum GenerateIcsRole {
   ATTENDEE = "attendee",
@@ -20,7 +32,7 @@ export default function generateIcsFile({
   role: GenerateIcsRole;
   status: EventStatus;
   t?: TFunction;
-}) {
+}): IcsFile | null {
   // O365 deletes emails if the calendar event is selected. Currently no option to disable this on the web
   if (
     role !== GenerateIcsRole.ATTENDEE &&
@@ -29,13 +41,16 @@ export default function generateIcsFile({
   )
     return null;
 
+  const method = getIcsMethod(status);
+
   return {
     filename: "event.ics",
     content: generateIcsString({
       event: calEvent,
       status,
+      method,
       t,
     }),
-    method: "REQUEST",
+    method,
   };
 }

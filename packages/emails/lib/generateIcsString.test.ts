@@ -1,16 +1,21 @@
-import { describe, expect, vi } from "vitest";
-
 import { ORGANIZER_EMAIL_EXEMPT_DOMAINS } from "@calcom/lib/constants";
 import { ErrorCode } from "@calcom/lib/errorCodes";
 import { ErrorWithCode } from "@calcom/lib/errors";
-import { buildCalendarEvent, buildPerson } from "@calcom/lib/test/builder";
-import { buildVideoCallData } from "@calcom/lib/test/builder";
-import type { CalendarEvent } from "@calcom/types/Calendar";
+import { buildCalendarEvent, buildPerson, buildVideoCallData } from "@calcom/lib/test/builder";
 import { test } from "@calcom/testing/lib/fixtures/fixtures";
-
+import type { CalendarEvent } from "@calcom/types/Calendar";
+import { describe, expect, vi } from "vitest";
 import generateIcsString from "./generateIcsString";
 
-const assertHasIcsString = (icsString: string | undefined) => {
+type IcsMethod = "REQUEST" | "CANCEL";
+
+const getExpectedMethod = (status: string): IcsMethod => {
+  if (status === "CANCELLED") return "CANCEL";
+
+  return "REQUEST";
+};
+
+const assertHasIcsString = (icsString: string | undefined): string => {
   if (!icsString) throw new Error("icsString is undefined");
 
   expect(icsString).toBeDefined();
@@ -22,11 +27,13 @@ const testIcsStringContains = ({
   icsString,
   event,
   status,
+  method = getExpectedMethod(status),
 }: {
   icsString: string;
   event: CalendarEvent;
   status: string;
-}) => {
+  method?: IcsMethod;
+}): void => {
   const DTSTART = `${event.startTime.split(".")[0].split(":").slice(0, 2).join(":").replace(/[-:]/g, "")}00Z`;
   const DTEND = `${event.endTime.split(".")[0].split(":").slice(0, 2).join(":").replace(/[-:]/g, "")}00Z`;
   const isOrganizerExempt = ORGANIZER_EMAIL_EXEMPT_DOMAINS?.split(",")
@@ -45,6 +52,7 @@ const testIcsStringContains = ({
     );
   }
   expect(icsString).toEqual(expect.stringContaining(`DTEND:${DTEND}`));
+  expect(icsString).toEqual(expect.stringContaining(`METHOD:${method}`));
   expect(icsString).toEqual(expect.stringContaining(`STATUS:${status}`));
   //   Getting an error expected icsString to deeply equal stringMatching
   //   for (const attendee of event.attendees) {
@@ -90,6 +98,23 @@ describe("generateIcsString", () => {
       const assertedIcsString = assertHasIcsString(icsString);
 
       testIcsStringContains({ icsString: assertedIcsString, event, status });
+    });
+    test("when bookingAction is Cancel with explicit request method", () => {
+      const event = buildCalendarEvent({
+        iCalSequence: 0,
+        attendees: [buildPerson()],
+      });
+      const status = "CANCELLED";
+
+      const icsString = generateIcsString({
+        event,
+        status,
+        method: "REQUEST",
+      });
+
+      const assertedIcsString = assertHasIcsString(icsString);
+
+      testIcsStringContains({ icsString: assertedIcsString, event, status, method: "REQUEST" });
     });
     test("when bookingAction is Reschedule", () => {
       const event = buildCalendarEvent({

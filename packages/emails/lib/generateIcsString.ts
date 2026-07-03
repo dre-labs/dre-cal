@@ -1,16 +1,14 @@
-import type { TFunction } from "i18next";
-import type { DateArray, ParticipationRole, EventStatus, ParticipationStatus } from "ics";
-import { createEvent } from "ics";
-import { RRule } from "rrule";
-
-import { getRichDescription } from "@calcom/lib/CalEventParser";
-import { getVideoCallUrlFromCalEvent } from "@calcom/lib/CalEventParser";
+import { getRichDescription, getVideoCallUrlFromCalEvent } from "@calcom/lib/CalEventParser";
 import { ORGANIZER_EMAIL_EXEMPT_DOMAINS } from "@calcom/lib/constants";
 import { ErrorCode } from "@calcom/lib/errorCodes";
 import { ErrorWithCode } from "@calcom/lib/errors";
 import type { CalendarEvent, Person } from "@calcom/types/Calendar";
+import type { TFunction } from "i18next";
+import type { DateArray, EventStatus, ParticipationRole, ParticipationStatus } from "ics";
+import { createEvent } from "ics";
+import { RRule } from "rrule";
 
-export enum BookingAction {
+enum BookingAction {
   Create = "create",
   Cancel = "cancel",
   Reschedule = "reschedule",
@@ -18,7 +16,7 @@ export enum BookingAction {
   LocationChange = "location_change",
 }
 
-export type ICSCalendarEvent = Pick<
+type ICSCalendarEvent = Pick<
   CalendarEvent,
   | "uid"
   | "iCalUID"
@@ -36,6 +34,14 @@ export type ICSCalendarEvent = Pick<
   | "hideOrganizerEmail"
 >;
 
+type IcsMethod = "REQUEST" | "CANCEL";
+
+const getIcsMethod = (status: EventStatus): IcsMethod => {
+  if (status === "CANCELLED") return "CANCEL";
+
+  return "REQUEST";
+};
+
 const toICalDateArray = (date: string): DateArray => {
   const d = new Date(date);
   return [
@@ -50,18 +56,26 @@ const toICalDateArray = (date: string): DateArray => {
 const generateIcsString = ({
   event,
   status,
+  method,
   partstat = "ACCEPTED",
   t,
 }: {
   event: ICSCalendarEvent;
   status: EventStatus;
+  method?: IcsMethod;
   partstat?: ParticipationStatus;
   t?: TFunction;
 }): string | undefined => {
+  const icsMethod = method ?? getIcsMethod(status);
   const location = getVideoCallUrlFromCalEvent(event) || event.location;
+  const uid = event.iCalUID || event.uid;
+
+  if (!uid) {
+    throw new ErrorWithCode(ErrorCode.BadRequest, "Missing UID for ICS event");
+  }
 
   // Taking care of recurrence rule
-  let recurrenceRule: string | undefined = undefined;
+  let recurrenceRule: string | undefined;
   const icsRole: ParticipationRole = "REQ-PARTICIPANT";
   if (event.recurringEvent?.count) {
     // ics appends "RRULE:" already, so removing it from RRule generated string
@@ -72,8 +86,32 @@ const generateIcsString = ({
     .filter((domain) => domain.trim() !== "")
     .some((domain) => event.organizer.email.toLowerCase().endsWith(domain.toLowerCase()));
 
+  const organizer = {
+    name: event.organizer.name,
+    email: event.organizer.email,
+  };
+
+  if (event.hideOrganizerEmail && !isOrganizerExempt) {
+    organizer.email = "no-reply@cal.com";
+  }
+
+  const teamAttendees =
+    event.team?.members?.map((member: Person) => ({
+      name: member.name,
+      email: member.email,
+      partstat,
+      role: icsRole,
+      rsvp: true,
+    })) ?? [];
+
+  const optionalEventProperties: { classification?: "PRIVATE" } = {};
+
+  if (event.hideCalendarEventDetails) {
+    optionalEventProperties.classification = "PRIVATE";
+  }
+
   const icsEvent = createEvent({
-    uid: event.iCalUID || event.uid!,
+    uid,
     sequence: event.iCalSequence || 0,
     start: toICalDateArray(event.startTime),
     end: toICalDateArray(event.endTime),
@@ -81,12 +119,7 @@ const generateIcsString = ({
     productId: "calcom/ics",
     title: event.title,
     description: getRichDescription(event, t),
-    organizer: {
-      name: event.organizer.name,
-      ...(event.hideOrganizerEmail && !isOrganizerExempt
-        ? { email: "no-reply@cal.com" }
-        : { email: event.organizer.email }),
-    },
+    organizer,
     ...{ recurrenceRule },
     attendees: [
       ...event.attendees.map((attendee: Person) => ({
@@ -96,20 +129,12 @@ const generateIcsString = ({
         role: icsRole,
         rsvp: true,
       })),
-      ...(event.team?.members
-        ? event.team?.members.map((member: Person) => ({
-            name: member.name,
-            email: member.email,
-            partstat,
-            role: icsRole,
-            rsvp: true,
-          }))
-        : []),
+      ...teamAttendees,
     ],
     location: location ?? undefined,
-    method: "REQUEST",
+    method: icsMethod,
     status,
-    ...(event.hideCalendarEventDetails ? { classification: "PRIVATE" } : {}),
+    ...optionalEventProperties,
     busyStatus: "BUSY",
   });
   if (icsEvent.error) {
@@ -123,4 +148,6 @@ const generateIcsString = ({
   return icsEvent.value;
 };
 
+export { BookingAction };
+export type { ICSCalendarEvent };
 export default generateIcsString;
