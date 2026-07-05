@@ -18,10 +18,11 @@ import type { Prisma } from "@calcom/prisma/client";
 import { MembershipRole, SchedulingType } from "@calcom/prisma/enums";
 import { customInputSchema } from "@calcom/prisma/zod-utils";
 import { TRPCError } from "@trpc/server";
+import process from "node:process";
 
 const getOrganizationRepository = () => ({ findById: async (..._args: unknown[]) => null });
 const getBookerBaseUrl = async (_orgSlug?: string | number | null): Promise<string> =>
-  process.env.NEXT_PUBLIC_WEBAPP_URL || "https://app.cal.com";
+  process.env.NEXT_PUBLIC_WEBAPP_URL || "https://cal.dre.app";
 
 interface getEventTypeByIdProps {
   eventTypeId: number;

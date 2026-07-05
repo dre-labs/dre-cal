@@ -9,7 +9,6 @@ import type { Ensure, Optional } from "@calcom/types/utils";
 import type { TFunction } from "i18next";
 import { isValidPhoneNumber } from "libphonenumber-js/max";
 import { z } from "zod";
-
 import type { EventLocationTypeFromAppMeta } from "../types/App";
 import {
   DailyLocationType as importedDailyLocationType,
@@ -562,7 +561,7 @@ export const locationsResolver = (t: TFunction) => {
                   path: [eventLocationType?.defaultValueVariable ?? "link"],
                   message: t("invalid_url_error_message", {
                     label: eventLocationType.label,
-                    sampleUrl: sampleUrl ?? "https://cal.com",
+                    sampleUrl: sampleUrl ?? "https://cal.dre.app",
                   }),
                 });
               }

@@ -4,13 +4,11 @@
   "slug": "n8n",
   "type": "n8n_automation",
   "logo": "icon.svg",
-  "url": "https://cal.com/",
+  "url": "https://cal.dre.app/",
   "variant": "automation",
-  "categories": [
-    "automation"
-  ],
-  "publisher": "Cal.com, Inc.",
-  "email": "help@cal.com",
+  "categories": ["automation"],
+  "publisher": "DRE Cal",
+  "email": "support@dre.app",
   "description": "Automate without limits. The workflow automation platform that doesn't box you in, that you never outgrow",
   "__createdUsingCli": true,
   "isOAuth": false,

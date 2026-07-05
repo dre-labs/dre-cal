@@ -6,7 +6,7 @@ import { getApiNameForReactSnippet, getApiNameForVanillaJsSnippet } from "./getA
 import { getDimension } from "./getDimension";
 
 export const doWeNeedCalOriginProp = (embedCalOrigin: string) => {
-  // If we are self hosted, calOrigin won't be app.cal.com so we need to pass it
+  // If we are self hosted, calOrigin won't be cal.dre.app so we need to pass it
   // If we are not self hosted but it's still different from WEBAPP_URL and WEBSITE_URL, we need to pass it -> It happens for organization booking URL at the moment
   return IS_SELF_HOSTED || (embedCalOrigin !== WEBAPP_URL && embedCalOrigin !== WEBSITE_URL);
 };

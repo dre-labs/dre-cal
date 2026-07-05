@@ -1,7 +1,5 @@
-import { describe, expect, it } from "vitest";
-
 import type { TFunction } from "i18next";
-
+import { describe, expect, it } from "vitest";
 import OAuthClientApprovedEmail from "./oauth-client-approved-notification";
 
 class TestOAuthClientApprovedEmail extends OAuthClientApprovedEmail {
@@ -29,7 +27,7 @@ describe("OAuthClientApprovedEmail", () => {
       }
 
       if (key === "oauth_client_approved_email_footer") {
-        return "You can now use your client ID and secret to integrate with Cal.diy.";
+        return "You can now use your client ID and secret to integrate with DRE Cal.";
       }
 
       if (key === "oauth_client_approved_email_cta") return "View Your OAuth Clients";
@@ -73,6 +71,6 @@ describe("OAuthClientApprovedEmail", () => {
     expect(html).toContain("View Your OAuth Clients");
     expect(html).toContain("/settings/developer/oauth");
 
-    expect(html).toContain("You can now use your client ID and secret to integrate with Cal.diy.");
+    expect(html).toContain("You can now use your client ID and secret to integrate with DRE Cal.");
   });
 });

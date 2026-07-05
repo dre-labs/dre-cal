@@ -20,7 +20,7 @@ const loadConfig = (): AppConfig => {
       url: `${apiUrl}${portSuffix}/v2`,
       keyPrefix: getEnv("API_KEY_PREFIX", "cal_"),
       licenseKey: getEnv("CALCOM_LICENSE_KEY", ""),
-      licenseKeyUrl: getEnv("GET_LICENSE_KEY_URL", "https://console.cal.com/api/license"),
+      licenseKeyUrl: getEnv("GET_LICENSE_KEY_URL", "https://console.cal.dre.app/api/license"),
     },
     db: {
       readUrl: getEnv("DATABASE_READ_URL"),
@@ -42,7 +42,7 @@ const loadConfig = (): AppConfig => {
       isTeamBillingEnabled: getEnv("IS_TEAM_BILLING_ENABLED", true),
     },
     app: {
-      baseUrl: getEnv("WEB_APP_URL", "https://app.cal.com"),
+      baseUrl: getEnv("WEB_APP_URL", "https://cal.dre.app"),
     },
     e2e: getEnv("IS_E2E", "false") === "true",
     enableSlotsWorkers: getEnv("ENABLE_SLOTS_WORKERS", "true") === "true",

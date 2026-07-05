@@ -353,7 +353,7 @@ test.describe("Event Types tests", () => {
 
         await page.locator("[data-testid=add-location]").click();
 
-        const testUrl2 = "https://cal.com/ai";
+        const testUrl2 = "https://cal.dre.app/ai";
         await page.locator(`text="Link meeting"`).last().click();
         await page.locator(`input[name="${locationInputName(1)}"]`).waitFor();
         await page.locator(`input[name="${locationInputName(1)}"]`).fill(testUrl2);

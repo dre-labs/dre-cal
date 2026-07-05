@@ -4,13 +4,11 @@
   "slug": "baa-for-hipaa",
   "type": "baa-for-hipaa_other",
   "logo": "icon.svg",
-  "url": "https://cal.com/BAA",
+  "url": "https://cal.dre.app/BAA",
   "variant": "other",
-  "categories": [
-    "other"
-  ],
-  "publisher": "Cal.com, Inc.",
-  "email": "support@cal.com",
+  "categories": ["other"],
+  "publisher": "DRE Cal",
+  "email": "support@dre.app",
   "description": "Request a signed Business Associate Agreement for your HIPAA compliance records",
   "isTemplate": false,
   "__createdUsingCli": true,
@@ -20,7 +18,7 @@
     "mode": "subscription"
   },
   "externalLink": {
-    "url": "https://cal.com/BAA",
+    "url": "https://cal.dre.app/BAA",
     "newTab": true
   }
 }

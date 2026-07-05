@@ -1,6 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-
 import { WEBAPP_URL } from "@calcom/lib/constants";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
@@ -20,15 +19,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         const parsedUrl = new URL(url);
         const hostname = parsedUrl.hostname.toLowerCase();
-        
-        if (hostname === "cal.com" || hostname.endsWith(".cal.com")) {
+
+        if (hostname === "cal.dre.app" || hostname.endsWith(".cal.dre.app")) {
           origin = parsedUrl.origin;
           calLink = parsedUrl.pathname + parsedUrl.search;
           if (calLink.startsWith("/")) {
             calLink = calLink.substring(1);
           }
         } else {
-          return res.status(400).json({ message: "URL must be for cal.com or a subdomain of cal.com" });
+          return res
+            .status(400)
+            .json({ message: "URL must be for cal.dre.app or a subdomain of cal.dre.app" });
         }
       } catch {
         return res.status(400).json({ message: "Invalid URL format" });
@@ -42,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Cal.diy</title>
+          <title>DRE Cal</title>
           <meta charset="UTF-8" />
           <script src="https://s3.amazonaws.com/intercom-sheets.com/messenger-sheet-library.latest.js"></script>
         </head>
@@ -78,7 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   }
                   p(cal, ar);
                 };
-            })(window, "https://app.cal.com/embed/embed.js", "init");
+            })(window, "https://cal.dre.app/embed/embed.js", "init");
 
             Cal("init", { origin: "${origin}" });
 

@@ -53,7 +53,7 @@ describe("Trigger Host No Show:", () => {
       const { dateString: plus1DateString } = getDate({ dateIncrement: 1 });
 
       const uidOfBooking = "n5Wv3eHgconAED2j4gcVhP";
-      const iCalUID = `${uidOfBooking}@Cal.diy`;
+      const iCalUID = `${uidOfBooking}@DRE Cal`;
       const subscriberUrl = "http://my-webhook.example.com";
       const bookingStartTime = `${plus1DateString}T05:00:00.000Z`;
 
@@ -176,7 +176,6 @@ describe("Trigger Host No Show:", () => {
           message: `Host with email ${organizer.email} didn't join the call or didn't join before ${maxStartTimeHumanReadable}`,
         },
       });
-
     },
     timeout
   );
@@ -195,7 +194,7 @@ describe("Trigger Host No Show:", () => {
       const { dateString: plus1DateString } = getDate({ dateIncrement: 1 });
 
       const uidOfBooking = "n5Wv3eHgconAED2j4gcVhP";
-      const iCalUID = `${uidOfBooking}@Cal.diy`;
+      const iCalUID = `${uidOfBooking}@DRE Cal`;
       const subscriberUrl = "http://my-webhook.example.com";
       const bookingStartTime = `${plus1DateString}T05:00:00.000Z`;
 
@@ -344,7 +343,6 @@ describe("Trigger Host No Show:", () => {
           message: `Host with email ${organizer.email} didn't join the call or didn't join before ${maxStartTimeHumanReadable}`,
         },
       });
-
     },
     timeout
   );
@@ -363,12 +361,12 @@ describe("Trigger Host No Show:", () => {
       const { dateString: plus1DateString } = getDate({ dateIncrement: 1 });
 
       const uidOfBooking = "j5Wv3eHgconAED2j4gcVhP";
-      const iCalUID = `${uidOfBooking}@Cal.diy`;
+      const iCalUID = `${uidOfBooking}@DRE Cal`;
       const subscriberUrl = "http://my-webhook.example.com";
       const bookingStartTime = `${plus1DateString}T05:00:00.000Z`;
 
       const newUidOfBooking = "k5Wv3eHgconAED2j4gcVhP";
-      const newiCalUID = `${newUidOfBooking}@Cal.diy`;
+      const newiCalUID = `${newUidOfBooking}@DRE Cal`;
       const newBookingStartTime = `${plus1DateString}T05:15:00.000Z`;
 
       await createBookingScenario(
@@ -552,7 +550,6 @@ describe("Trigger Host No Show:", () => {
           message: `Host with email ${organizer.email} didn't join the call or didn't join before ${maxStartTimeHumanReadable}`,
         },
       });
-
     },
     timeout
   );
@@ -571,7 +568,7 @@ describe("Trigger Host No Show:", () => {
       const { dateString: plus1DateString } = getDate({ dateIncrement: 1 });
 
       const uidOfBooking = "n5Wv3eHgconAED2j4gcVhP";
-      const iCalUID = `${uidOfBooking}@Cal.diy`;
+      const iCalUID = `${uidOfBooking}@DRE Cal`;
       const subscriberUrl = "http://my-webhook.example.com";
       const bookingStartTime = `${plus1DateString}T05:00:00.000Z`;
 
@@ -707,7 +704,6 @@ describe("Trigger Host No Show:", () => {
           message: `Host with email ${organizer.email} didn't join the call or didn't join before ${maxStartTimeHumanReadable}`,
         },
       });
-
     },
     timeout
   );
@@ -726,7 +722,7 @@ describe("Trigger Host No Show:", () => {
       const { dateString: plus1DateString } = getDate({ dateIncrement: 1 });
 
       const uidOfBooking = "n5Wv3eHgconAED2j4gcVhP";
-      const iCalUID = `${uidOfBooking}@Cal.diy`;
+      const iCalUID = `${uidOfBooking}@DRE Cal`;
       const subscriberUrl = "http://my-webhook.example.com";
       const bookingStartTime = `${plus1DateString}T05:00:00.000Z`;
 
@@ -861,7 +857,6 @@ describe("Trigger Host No Show:", () => {
           payload: expect.any(Object),
         })
       ).toThrow();
-
     },
     timeout
   );

@@ -59,8 +59,8 @@ import { testWithAndWithoutOrg } from "@calcom/testing/lib/bookingScenario/test"
 import { test } from "@calcom/testing/lib/fixtures/fixtures";
 import type { Request, Response } from "express";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { describe, expect } from "vitest";
 import type Stripe from "stripe";
+import { describe, expect } from "vitest";
 import { getNewBookingHandler } from "./getNewBookingHandler";
 
 const log = logger.getSubLogger({ prefix: ["[fresh-booking.test]"] });
@@ -407,7 +407,7 @@ describe("handleNewBooking", () => {
           expectSuccessfulCalendarEventCreationInCalendar(calendarMock, {
             videoCallUrl: "http://mock-dailyvideo.example.com/meeting-1",
             // We won't be sending evt.destinationCalendar in this case.
-            // Google Calendar in this case fallbacks to the "primary" calendar - https://github.com/calcom/cal.diy/blob/7d5dad7fea78ff24dddbe44f1da5d7e08e1ff568/packages/app-store/googlecalendar/lib/CalendarService.ts#L217
+            // Google Calendar in this case fallbacks to the "primary" calendar - https://cal.dre.app/blob/7d5dad7fea78ff24dddbe44f1da5d7e08e1ff568/packages/app-store/googlecalendar/lib/CalendarService.ts#L217
             // Not sure if it's the correct behaviour. Right now, it isn't possible to have an organizer with connected calendar but no destination calendar - As soon as the Google Calendar app is installed, a destination calendar is created.
             calendarId: null,
           });
@@ -823,7 +823,6 @@ describe("handleNewBooking", () => {
             ],
             iCalUID: createdBooking.iCalUID,
           });
-
 
           expectSuccessfulCalendarEventCreationInCalendar(calendarMock, {
             calendarId: "organizer@google-calendar.com",
@@ -1879,7 +1878,7 @@ describe("handleNewBooking", () => {
       "Availability Check during booking",
       () => {
         test(
-          `should fail a booking if there is already a Cal.diy booking overlapping the time`,
+          `should fail a booking if there is already a DRE Cal booking overlapping the time`,
           async () => {
             const handleNewBooking = getNewBookingHandler();
 
@@ -2948,7 +2947,8 @@ describe("handleNewBooking", () => {
           const booker = getBooker({
             email: "booker@example.com",
             name: "Booker",
-          });          const organizer = getOrganizer({
+          });
+          const organizer = getOrganizer({
             name: "Organizer",
             email: "organizer@example.com",
             id: 101,
@@ -3086,7 +3086,8 @@ describe("handleNewBooking", () => {
             7. Booking should still stay in pending state
       `,
 
-        async ({ emails }) => {          const handleNewBooking = getNewBookingHandler();
+        async ({ emails }) => {
+          const handleNewBooking = getNewBookingHandler();
           const subscriberUrl = "http://my-webhook.example.com";
           const booker = getBooker({
             email: "booker@example.com",

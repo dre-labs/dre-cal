@@ -1,6 +1,5 @@
-import { vi, beforeEach } from "vitest";
-
 import type * as constants from "@calcom/lib/constants";
+import { beforeEach, vi } from "vitest";
 
 const initialConstants = {
   IS_PRODUCTION: false,
@@ -13,10 +12,10 @@ const initialConstants = {
   DEFAULT_DARK_BRAND_COLOR: "#fafafa",
   CALCOM_VERSION: "0.0.0",
   IS_SELF_HOSTED: false,
-  SEO_IMG_DEFAULT: "https://cal.com/og-image.png",
-  SEO_IMG_OGIMG: "https://cal.com/og-image-wide.png",
+  SEO_IMG_DEFAULT: "https://cal.dre.app/og-image.png",
+  SEO_IMG_OGIMG: "https://cal.dre.app/og-image-wide.png",
   CURRENT_TIMEZONE: "Europe/London",
-  APP_NAME: "Cal.diy",
+  APP_NAME: "DRE Cal",
   BOOKER_NUMBER_OF_DAYS_TO_LOAD: 14,
   PUBLIC_QUICK_AVAILABILITY_ROLLOUT: 100,
   SINGLE_ORG_SLUG: "",

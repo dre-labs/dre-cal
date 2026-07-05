@@ -6,8 +6,8 @@ import { UsersRepository } from "@/modules/users/users.repository";
 
 jest.mock("@calcom/platform-libraries/organizations", () => ({
   getBookerBaseUrlSync: jest.fn((slug: string | null) => {
-    if (!slug) return "https://cal.com";
-    return `https://${slug}.cal.com`;
+    if (!slug) return "https://cal.dre.app";
+    return `https://${slug}.cal.dre.app`;
   }),
 }));
 
@@ -19,7 +19,7 @@ describe("OutputEventTypesService_2024_06_14", () => {
   beforeEach(() => {
     configService = {
       get: jest.fn((key: string, defaultValue?: string) => {
-        if (key === "app.baseUrl") return "https://cal.com";
+        if (key === "app.baseUrl") return "https://cal.dre.app";
         return defaultValue;
       }),
     } as any;
@@ -50,7 +50,7 @@ describe("OutputEventTypesService_2024_06_14", () => {
 
       const result = service.buildBookingUrl(user, slug);
 
-      expect(result).toBe("https://cal.com/john-doe/30min");
+      expect(result).toBe("https://cal.dre.app/john-doe/30min");
     });
 
     it("should use profile username for org users", () => {
@@ -79,10 +79,10 @@ describe("OutputEventTypesService_2024_06_14", () => {
 
       const result = service.buildBookingUrl(user, slug);
 
-      expect(result).toBe("https://acme.cal.com/owner1/30min");
+      expect(result).toBe("https://acme.cal.dre.app/owner1/30min");
     });
 
-    it("should use cal.com for non-managed users in platform orgs", () => {
+    it("should use cal.dre.app for non-managed users in platform orgs", () => {
       const user = {
         id: 1,
         name: "Test User",
@@ -109,7 +109,7 @@ describe("OutputEventTypesService_2024_06_14", () => {
       const result = service.buildBookingUrl(user, slug);
 
       // Should use user.username (platform-user), not profile.username (platform-user-generated-id)
-      expect(result).toBe("https://cal.com/platform-user/secret");
+      expect(result).toBe("https://cal.dre.app/platform-user/secret");
     });
 
     it("should return empty string for managed users", () => {
@@ -161,7 +161,7 @@ describe("OutputEventTypesService_2024_06_14", () => {
 
       const result = service.buildBookingUrl(user, slug);
 
-      expect(result).toBe("https://i.cal.com/keith/30min");
+      expect(result).toBe("https://i.cal.dre.app/keith/30min");
     });
 
     it("should return empty string when user is undefined", () => {
@@ -199,12 +199,12 @@ describe("OutputEventTypesService_2024_06_14", () => {
 
       const result = service.buildBookingUrl(user, slug);
 
-      expect(result).toBe("https://cal.com/user/consultation");
+      expect(result).toBe("https://cal.dre.app/user/consultation");
     });
 
     it("should handle base URL with trailing slash", () => {
       const { getBookerBaseUrlSync } = require("@calcom/platform-libraries/organizations");
-      getBookerBaseUrlSync.mockReturnValueOnce("https://acme.cal.com/");
+      getBookerBaseUrlSync.mockReturnValueOnce("https://acme.cal.dre.app/");
 
       const user = {
         id: 1,
@@ -231,7 +231,7 @@ describe("OutputEventTypesService_2024_06_14", () => {
 
       const result = service.buildBookingUrl(user, slug);
 
-      expect(result).toBe("https://acme.cal.com/john/30min");
+      expect(result).toBe("https://acme.cal.dre.app/john/30min");
     });
 
     it("should return empty string when username is empty", () => {
@@ -279,4 +279,3 @@ describe("OutputEventTypesService_2024_06_14", () => {
     });
   });
 });
-

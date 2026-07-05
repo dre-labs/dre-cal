@@ -1,10 +1,8 @@
-import { Dub } from "dub-package";
-
 import { CredentialRepository } from "@calcom/features/credentials/repositories/CredentialRepository";
 import logger from "@calcom/lib/logger";
 import type { AnalyticsService, SendEventProps } from "@calcom/types/AnalyticsService";
 import type { CredentialPayload } from "@calcom/types/Credential";
-
+import { Dub } from "dub-package";
 import getAppKeysFromSlug from "../../_utils/getAppKeysFromSlug";
 import refreshOAuthTokens from "../../_utils/oauth/refreshOAuthTokens";
 import type { DubOAuthToken } from "./type";
@@ -116,7 +114,7 @@ class DubService implements AnalyticsService {
       customerName: name,
       customerEmail: email,
       externalId: externalId ?? email,
-      eventName: eventName ?? "Cal.diy lead",
+      eventName: eventName ?? "DRE Cal lead",
     });
   }
 }

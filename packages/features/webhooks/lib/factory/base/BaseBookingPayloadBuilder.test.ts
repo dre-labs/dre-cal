@@ -41,7 +41,7 @@ describe("BookingPayloadBuilder (v2021-10-20)", () => {
         language: { locale: "en" },
       },
     ],
-    location: "https://cal.com/video/123",
+    location: "https://cal.dre.app/video/123",
     uid: "booking-uid-123",
     customInputs: {},
     responses: {},

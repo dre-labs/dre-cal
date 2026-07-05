@@ -340,10 +340,10 @@ export class Cal {
 
     const searchParams = this.buildFilteredQueryParams(queryParamsFromConfig);
 
-    // cal.com has rewrite issues on Safari that sometimes cause 404 for assets.
+    // cal.dre.app has rewrite issues on Safari that sometimes cause 404 for assets.
     const originToUse = (calOrigin || calConfig.calOrigin || "").replace(
-      "https://cal.com",
-      "https://app.cal.com"
+      "https://cal.dre.app",
+      "https://cal.dre.app"
     );
 
     const urlInstance = new URL(`${originToUse}/${calLink}`);
@@ -403,7 +403,7 @@ export class Cal {
       throw new Error("iframe doesn't exist. `createIframe` must be called before `doInIframe`");
     }
     if (this.iframe.contentWindow) {
-      // TODO: Ensure that targetOrigin is as defined by user(and not *). Generally it would be cal.com but in case of self hosting it can be anything.
+      // TODO: Ensure that targetOrigin is as defined by user(and not *). Generally it would be cal.dre.app but in case of self hosting it can be anything.
       // Maybe we can derive targetOrigin from __config.origin
       this.iframe.contentWindow.postMessage(
         { originator: "CAL", method: doInIframeArg.method, arg: doInIframeArg.arg },

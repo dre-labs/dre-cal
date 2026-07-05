@@ -28,6 +28,7 @@ import { ErrorCode } from "@calcom/lib/errorCodes";
 import logger from "@calcom/lib/logger";
 import { BookingStatus, SchedulingType } from "@calcom/prisma/enums";
 import { test } from "@calcom/testing/lib/fixtures/fixtures";
+import process from "node:process";
 
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
 
@@ -202,7 +203,7 @@ describe("handleNewBooking", () => {
               organizer,
               location: "integrations:daily",
               subscriberUrl: "http://my-webhook.example.com",
-              //FIXME: All recurring bookings seem to have the same URL. https://github.com/calcom/cal.diy/issues/11955
+              //FIXME: All recurring bookings seem to have the same URL. https://cal.dre.app/issues/11955
               videoCallUrl: `${WEBAPP_URL}/video/${createdBookings[0].uid}`,
             });
           }

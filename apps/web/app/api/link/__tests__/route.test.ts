@@ -150,8 +150,8 @@ describe("link route", () => {
 
     it("should construct redirect URLs using WEBAPP_URL regardless of request origin", async () => {
       const testOrigins = [
-        "https://app.cal.com",
-        "https://acme.cal.com",
+        "https://cal.dre.app",
+        "https://acme.cal.dre.app",
         "https://calcom.company.internal",
         "http://192.168.1.100:3000",
       ];

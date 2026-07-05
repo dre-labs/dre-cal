@@ -27,7 +27,7 @@ abstract class BasePrivateLinkOutput {
     description: "Full booking URL for this private link",
     type: String,
     format: "uri",
-    example: "https://cal.com/d/abc123def456/30min",
+    example: "https://cal.dre.app/d/abc123def456/30min",
   })
   bookingUrl!: string;
 }

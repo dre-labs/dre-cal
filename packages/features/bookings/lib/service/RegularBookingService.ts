@@ -1321,7 +1321,7 @@ async function handler(
   });
 
   const organizerOrganizationId = organizerOrganizationProfile?.organizationId;
-  const bookerUrl = process.env.NEXT_PUBLIC_WEBAPP_URL || "https://app.cal.com";
+  const bookerUrl = process.env.NEXT_PUBLIC_WEBAPP_URL || "https://cal.dre.app";
 
   const destinationCalendar = eventType.destinationCalendar
     ? [eventType.destinationCalendar]
@@ -2519,14 +2519,14 @@ async function handler(
       bookingInfo: {
         name: fullName,
         email: bookerEmail,
-        eventName: "Cal.diy lead",
+        eventName: "DRE Cal lead",
       },
       isTeamEventType,
     });
 
     // Unused until we deploy to trigger.dev production
-    // for now we only enable for cal.com org and we keep our current email system
-    // cal.com org members will see emails in double while we test
+    // for now we only enable for cal.dre.app org and we keep our current email system
+    // cal.dre.app org members will see emails in double while we test
     if (ENABLE_ASYNC_TASKER && !noEmail && isBookingEmailSmsTaskerEnabled) {
       try {
         await deps.bookingEmailAndSmsTasker.send({

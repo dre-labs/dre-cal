@@ -52,7 +52,7 @@ describe("CalendarEventBuilder", () => {
   ];
   const createBuilder = (overrides: Partial<CalendarEvent> = {}) =>
     new CalendarEventBuilder({
-      bookerUrl: "https://cal.com/user/test-slug",
+      bookerUrl: "https://cal.dre.app/user/test-slug",
       title: "Test Event",
       startTime: mockStartTime,
       endTime: mockEndTime,
@@ -72,7 +72,7 @@ describe("CalendarEventBuilder", () => {
 
     expect(event).not.toBeNull();
     if (event) {
-      expect(event.bookerUrl).toBe("https://cal.com/user/test-slug");
+      expect(event.bookerUrl).toBe("https://cal.dre.app/user/test-slug");
       expect(event.title).toBe("Test Event");
       expect(event.startTime).toBe(mockStartTime);
       expect(event.endTime).toBe(mockEndTime);
@@ -147,7 +147,7 @@ describe("CalendarEventBuilder", () => {
       },
     ];
 
-    const event = createBuilder({ attendees, bookerUrl: "https://cal.com/user" })
+    const event = createBuilder({ attendees, bookerUrl: "https://cal.dre.app/user" })
       .withEventType({
         id: 123,
       })
@@ -593,7 +593,7 @@ describe("CalendarEventBuilder", () => {
           createdAt: null,
           updatedAt: null,
           delegationCredentialId: null,
-            },
+        },
       ])
       .withIdentifiers({
         iCalUID: "ical-123",
@@ -664,7 +664,7 @@ describe("CalendarEventBuilder", () => {
       startTime: mockStartTime,
       endTime: mockEndTime,
       type: "existing-type",
-      bookerUrl: "https://cal.com/user/test-slug",
+      bookerUrl: "https://cal.dre.app/user/test-slug",
       organizer: defaultOrganizer,
       attendees: defaultAttendees,
     };
@@ -923,7 +923,7 @@ describe("CalendarEventBuilder", () => {
             createdAt: null,
             updatedAt: null,
             delegationCredentialId: null,
-                },
+          },
           profiles: [],
         },
         destinationCalendar: null,
@@ -977,7 +977,7 @@ describe("CalendarEventBuilder", () => {
                   createdAt: null,
                   updatedAt: null,
                   delegationCredentialId: null,
-                            },
+                },
               },
             },
             {
@@ -1002,7 +1002,7 @@ describe("CalendarEventBuilder", () => {
                   createdAt: null,
                   updatedAt: null,
                   delegationCredentialId: null,
-                            },
+                },
               },
             },
           ],
@@ -1370,7 +1370,7 @@ describe("CalendarEventBuilder", () => {
         type: "match-event",
         organizer: organizerPerson,
         attendees: [attendeePerson],
-        bookerUrl: "https://cal.com",
+        bookerUrl: "https://cal.dre.app",
         title: "Match Test",
         startTime: new Date(mockStartTime).toISOString(),
         endTime: new Date(mockEndTime).toISOString(),
@@ -1568,7 +1568,7 @@ describe("CalendarEventBuilder", () => {
             createdAt: null,
             updatedAt: null,
             delegationCredentialId: null,
-                },
+          },
           profiles: [{ organizationId: 1 }],
         },
         destinationCalendar: null,
@@ -1629,7 +1629,7 @@ describe("CalendarEventBuilder", () => {
                   createdAt: null,
                   updatedAt: null,
                   delegationCredentialId: null,
-                            },
+                },
               },
             },
             {
@@ -1654,7 +1654,7 @@ describe("CalendarEventBuilder", () => {
                   createdAt: null,
                   updatedAt: null,
                   delegationCredentialId: null,
-                            },
+                },
               },
             },
           ],

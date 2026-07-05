@@ -4,21 +4,17 @@
   "slug": "vimcal",
   "type": "vimcal_other",
   "logo": "icon.svg",
-  "url": "https://cal.com/",
+  "url": "https://cal.dre.app/",
   "variant": "other",
-  "categories": [
-    "calendar"
-  ],
-  "publisher": "Cal.com, Inc.",
-  "email": "support@cal.com",
+  "categories": ["calendar"],
+  "publisher": "DRE Cal",
+  "email": "support@dre.app",
   "description": "The world's fastest calendar, beautifully designed for a remote world\r",
   "__createdUsingCli": true,
-  "dependencies": [
-    "google-calendar"
-  ],
+  "dependencies": ["google-calendar"],
   "isOAuth": false,
   "externalLink": {
-    "url": "https://cal.com/blog/cal-plus-vimcal",
+    "url": "https://cal.dre.app/blog/cal-plus-vimcal",
     "newTab": true
   }
 }

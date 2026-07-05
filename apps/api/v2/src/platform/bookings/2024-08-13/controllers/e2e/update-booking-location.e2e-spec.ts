@@ -164,7 +164,7 @@ describe("Bookings Endpoints 2024-08-13 update booking location", () => {
 
     describe("can update booking with different locations", () => {
       const address = "123 Main St";
-      const link = "https://cal.com/join/123456";
+      const link = "https://cal.dre.app/join/123456";
       const phone = "+37121999999";
 
       let booking: Booking;
@@ -181,7 +181,7 @@ describe("Bookings Endpoints 2024-08-13 update booking location", () => {
             locations: [
               { type: "integrations:daily" },
               { type: "inPerson", address: "123 Main St", displayLocationPublicly: true },
-              { type: "link", link: "https://cal.com/join/123456", displayLocationPublicly: true },
+              { type: "link", link: "https://cal.dre.app/join/123456", displayLocationPublicly: true },
               { type: "userPhone", hostPhoneNumber: "+37121999999", displayLocationPublicly: true },
               { type: "attendeeInPerson" },
               { type: "phone" },

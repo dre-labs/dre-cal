@@ -1,12 +1,11 @@
 import logger from "@calcom/lib/logger";
-
 import type { SendgridFieldOptions, SendgridNewContact } from "../../Sendgrid";
 import Sendgrid from "../../Sendgrid";
-import type { ConsoleUserInfoType, WebUserInfoType } from "../ISyncService";
 import type ISyncService from "../ISyncService";
+import type { ConsoleUserInfoType, WebUserInfoType } from "../ISyncService";
 import SyncServiceCore from "../ISyncService";
 
-// Cal.diy Custom Contact Fields
+// DRE Cal Custom Contact Fields
 const calComCustomContactFields: SendgridFieldOptions = [
   // Field name, field type
   ["username", "Text"],

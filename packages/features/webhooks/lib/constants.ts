@@ -32,15 +32,15 @@ export const getWebhookVersionLabel = (version: WebhookVersion): string =>
  * Links to the specific version's payload documentation.
  */
 export const WEBHOOK_VERSION_DOCS: Record<WebhookVersion, string> = {
-  [WebhookVersion.V_2021_10_20]: "https://cal.com/docs/developing/guides/automation/webhooks#2021-10-20",
-  // Add new versions here: [WebhookVersion.V_YYYY_MM_DD]: "https://cal.com/docs/webhooks/v-yyyy-mm-dd",
+  [WebhookVersion.V_2021_10_20]: "https://cal.dre.app/docs/developing/guides/automation/webhooks#2021-10-20",
+  // Add new versions here: [WebhookVersion.V_YYYY_MM_DD]: "https://cal.dre.app/docs/webhooks/v-yyyy-mm-dd",
 };
 
 /**
  * Get documentation URL for a specific webhook version
  */
 export const getWebhookVersionDocsUrl = (version: WebhookVersion): string =>
-  WEBHOOK_VERSION_DOCS[version] ?? "https://cal.com/docs/developing/guides/automation/webhooks";
+  WEBHOOK_VERSION_DOCS[version] ?? "https://cal.dre.app/docs/developing/guides/automation/webhooks";
 
 export const WEBHOOK_TRIGGER_EVENTS_GROUPED_BY_APP = {
   core: [
@@ -64,6 +64,4 @@ export const WEBHOOK_TRIGGER_EVENTS_GROUPED_BY_APP = {
   ] as const,
 };
 
-export const WEBHOOK_TRIGGER_EVENTS = [
-  ...WEBHOOK_TRIGGER_EVENTS_GROUPED_BY_APP.core,
-] as const;
+export const WEBHOOK_TRIGGER_EVENTS = [...WEBHOOK_TRIGGER_EVENTS_GROUPED_BY_APP.core] as const;

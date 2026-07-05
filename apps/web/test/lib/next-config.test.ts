@@ -1,5 +1,5 @@
-import { it, expect, describe, beforeAll } from "vitest";
-
+import process from "node:process";
+import { beforeAll, describe, expect, it } from "vitest";
 import { getRegExpThatMatchesAllOrgDomains } from "../../getNextjsOrgRewriteConfig";
 
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -10,7 +10,7 @@ let orgUserRouteMatch: MatcherRes;
 
 beforeAll(async () => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //@ts-ignore
+  //@ts-expect-error
   process.env.NEXT_PUBLIC_WEBAPP_URL = "http://example.com";
   const { orgUserRoutePath, orgUserTypeRoutePath } = await import("../../pagesAndRewritePaths");
 
@@ -27,24 +27,24 @@ beforeAll(async () => {
 
 describe("next.config.js - Org Rewrite", () => {
   describe("getRegExpThatMatchesAllOrgDomains", () => {
-    it("WEBAPP_URL=app.cal.com", () => {
-      const regExp = new RegExp(getRegExpThatMatchesAllOrgDomains({ webAppUrl: "app.cal.com" }));
-      expect(regExp.exec("acme.cal.com")?.groups?.orgSlug).toEqual("acme");
-      expect(regExp.exec("app.cal.com")).toEqual(null);
-      // Even though it matches abc. We shouldn't match it as it isn't a subdomain of cal.com(derived from WEBAPP_URL)
+    it("WEBAPP_URL=cal.dre.app", () => {
+      const regExp = new RegExp(getRegExpThatMatchesAllOrgDomains({ webAppUrl: "cal.dre.app" }));
+      expect(regExp.exec("acme.cal.dre.app")?.groups?.orgSlug).toEqual("acme");
+      expect(regExp.exec("cal.dre.app")).toEqual(null);
+      // Even though it matches abc. We shouldn't match it as it isn't a subdomain of cal.dre.app(derived from WEBAPP_URL)
       // We could fix the RegExp, but that might break some unexpected self-hosted scenarios. So, we can fix it separately.
       expect(regExp.exec("abc.sdafasdf.com")?.groups?.orgSlug).toEqual("abc");
     });
 
-    it("WEBAPP_URL=https://app.cal.com", () => {
-      const regExp = new RegExp(getRegExpThatMatchesAllOrgDomains({ webAppUrl: "https://app.cal.com" }));
-      expect(regExp.exec("acme.cal.com")?.groups?.orgSlug).toEqual("acme");
-      expect(regExp.exec("app.cal.com")).toEqual(null);
+    it("WEBAPP_URL=https://cal.dre.app", () => {
+      const regExp = new RegExp(getRegExpThatMatchesAllOrgDomains({ webAppUrl: "https://cal.dre.app" }));
+      expect(regExp.exec("acme.cal.dre.app")?.groups?.orgSlug).toEqual("acme");
+      expect(regExp.exec("cal.dre.app")).toEqual(null);
 
-      // This approach though not used by managed cal.com, but might be in use by self-hosted users.
-      expect(regExp.exec("acme.app.cal.com")?.groups?.orgSlug).toEqual("acme");
+      // This approach though not used by managed cal.dre.app, but might be in use by self-hosted users.
+      expect(regExp.exec("acme.cal.dre.app")?.groups?.orgSlug).toEqual("acme");
 
-      // TODO: Even though it gives abc orgSlug. We shouldn't match it as it isn't a subdomain of cal.com(derived from WEBAPP_URL)
+      // TODO: Even though it gives abc orgSlug. We shouldn't match it as it isn't a subdomain of cal.dre.app(derived from WEBAPP_URL)
       // We could fix the RegExp, but that might break some unexpected self-hosted scenarios. So, we can fix it separately.
       expect(regExp.exec("abc.sdafasdf.com")?.groups?.orgSlug).toEqual("abc");
     });
@@ -54,7 +54,7 @@ describe("next.config.js - Org Rewrite", () => {
         getRegExpThatMatchesAllOrgDomains({ webAppUrl: "https://booker.dashboard.company.com" })
       );
 
-      // This approach though not used by managed cal.com, but might be in use by self-hosted users.
+      // This approach though not used by managed cal.dre.app, but might be in use by self-hosted users.
       expect(regExp.exec("acme.booker.dashboard.company.com")?.groups?.orgSlug).toEqual("acme");
       expect(regExp.exec("booker.dashboard.company.com")).toEqual(null);
     });
@@ -68,7 +68,7 @@ describe("next.config.js - Org Rewrite", () => {
       expect(regExp.exec("app.cal.local:3000")).toEqual(null);
     });
 
-    it("Vercel Preview special handling - vercel.app. Cal.diy deployed on vercel apps have different subdomains, so we can't consider them org domains", () => {
+    it("Vercel Preview special handling - vercel.app. DRE Cal deployed on vercel apps have different subdomains, so we can't consider them org domains", () => {
       const regExp = new RegExp(getRegExpThatMatchesAllOrgDomains({ webAppUrl: "http://app.vercel.app" }));
       // It is not matching on vercel.app but would have matched in any other case
       expect(regExp.exec("acme.vercel.app")).toEqual(null);
@@ -100,11 +100,7 @@ describe("next.config.js - Org Rewrite", () => {
         type: "def",
       });
 
-      // With teams removed, /team/abc is treated as a normal /:user/:type booking page
-      expect(orgUserTypeRouteMatch("/team/abc")?.params).toEqual({
-        user: "team",
-        type: "abc",
-      });
+      expect(orgUserTypeRouteMatch("/team/abc")).toEqual(false);
 
       expect(orgUserTypeRouteMatch("/abc")).toEqual(false);
 

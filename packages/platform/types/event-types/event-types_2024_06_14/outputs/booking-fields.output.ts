@@ -354,7 +354,7 @@ export class GuestsDefaultFieldOutput_2024_06_14 extends GuestsDefaultFieldInput
     type: Boolean,
     description:
       "Disable this booking field if the URL contains query parameter with key equal to the slug and prefill it with the provided value.\
-      For example, if URL contains query parameter `&guests=lauris@cal.com`,\
+      For example, if URL contains query parameter `&guests=lauris@cal.dre.app`,\
       the guests field will be prefilled with this value and disabled.",
   })
   disableOnPrefill!: boolean;
@@ -767,7 +767,7 @@ class OutputBookingFieldValidator_2024_06_14 implements ValidatorConstraintInter
 
 export function ValidateOutputBookingFields_2024_06_14(validationOptions?: ValidationOptions) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return function (object: any, propertyName: string) {
+  return (object: any, propertyName: string) => {
     registerDecorator({
       name: "ValidateOutputBookingFields",
       target: object.constructor,

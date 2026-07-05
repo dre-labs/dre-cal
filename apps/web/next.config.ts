@@ -12,6 +12,7 @@ import {
   orgUserTypeRoutePath,
 } from "./pagesAndRewritePaths";
 import { TRIGGER_VERSION } from "./trigger.version"; // adjust path as needed
+import process from "node:process";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -425,7 +426,7 @@ const nextConfig = (phase: string): NextConfig => {
           has: [
             {
               type: "host" as const,
-              value: "cal.com",
+              value: "cal.dre.app",
             },
           ],
           headers: [
@@ -517,7 +518,7 @@ const nextConfig = (phase: string): NextConfig => {
         },
         {
           source: "/auth/new",
-          destination: process.env.NEXT_PUBLIC_WEBAPP_URL || "https://app.cal.com",
+          destination: process.env.NEXT_PUBLIC_WEBAPP_URL || "https://cal.dre.app",
           permanent: true,
         },
         {
@@ -639,7 +640,7 @@ const nextConfig = (phase: string): NextConfig => {
           : []),
       ];
 
-      if (process.env.NEXT_PUBLIC_WEBAPP_URL === "https://app.cal.com") {
+      if (process.env.NEXT_PUBLIC_WEBAPP_URL === "https://cal.dre.app") {
         redirects.push(
           {
             source: "/apps/dailyvideo",

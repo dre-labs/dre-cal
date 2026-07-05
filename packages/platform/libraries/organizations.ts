@@ -3,7 +3,7 @@
 
 import process from "node:process";
 export function getBookerBaseUrlSync(_orgSlug: string | null): string {
-  return process.env.NEXT_PUBLIC_WEBAPP_URL || "https://app.cal.com";
+  return process.env.NEXT_PUBLIC_WEBAPP_URL || "https://cal.dre.app";
 }
 
 // Stub billing service for API v2 — org billing removed in community edition

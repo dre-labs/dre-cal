@@ -456,7 +456,11 @@ export const EventLimitsTab = ({ eventType, customClassNames }: EventLimitsTabPr
   };
 
   const shouldLockIndicator = (_field: string): null => null;
-  const shouldLockDisableProps = (_field: string) => ({ disabled: false, LockedIcon: false as const, isLocked: false });
+  const shouldLockDisableProps = (_field: string) => ({
+    disabled: false,
+    LockedIcon: false as const,
+    isLocked: false,
+  });
 
   const bookingLimitsLocked = shouldLockDisableProps("bookingLimits");
   const durationLimitsLocked = shouldLockDisableProps("durationLimits");
@@ -664,7 +668,7 @@ export const EventLimitsTab = ({ eventType, customClassNames }: EventLimitsTabPr
                 <LearnMoreLink
                   t={t}
                   i18nKey="limit_booking_frequency_description"
-                  href="https://cal.com/help/event-types/booking-frequency"
+                  href="https://cal.dre.app/help/event-types/booking-frequency"
                 />
               }
               checked={isChecked}
@@ -801,7 +805,7 @@ export const EventLimitsTab = ({ eventType, customClassNames }: EventLimitsTabPr
                 <LearnMoreLink
                   t={t}
                   i18nKey="limit_future_bookings_description"
-                  href="https://cal.com/help/event-types/limit-future-bookings"
+                  href="https://cal.dre.app/help/event-types/limit-future-bookings"
                 />
               }
               {...periodTypeLocked}

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// Default mock for Cal.diy SaaS (IS_SELF_HOSTED = false)
+// Default mock for DRE Cal SaaS (IS_SELF_HOSTED = false)
 vi.mock("@calcom/lib/constants", () => ({
   IS_SELF_HOSTED: false,
   IS_PRODUCTION: false,
@@ -134,15 +134,15 @@ describe("validateUrlForSSRFSync", () => {
 });
 
 describe("isTrustedInternalUrl", () => {
-  const webappUrl = "https://app.cal.com";
+  const webappUrl = "https://cal.dre.app";
 
   it("returns true for same origin", () => {
-    expect(isTrustedInternalUrl("https://app.cal.com/logo.png", webappUrl)).toBe(true);
+    expect(isTrustedInternalUrl("https://cal.dre.app/logo.png", webappUrl)).toBe(true);
   });
 
   it("returns false for different origins and invalid URLs", () => {
     expect(isTrustedInternalUrl("https://evil.com/logo.png", webappUrl)).toBe(false);
-    expect(isTrustedInternalUrl("https://app.cal.com.evil.com/x", webappUrl)).toBe(false);
+    expect(isTrustedInternalUrl("https://cal.dre.app.evil.com/x", webappUrl)).toBe(false);
     expect(isTrustedInternalUrl("not-a-url", webappUrl)).toBe(false);
   });
 });

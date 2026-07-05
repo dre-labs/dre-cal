@@ -30,7 +30,7 @@ export class OrganizationRepositoryFixture {
         data: {
           organizationId: team.id,
           isAdminAPIEnabled: true,
-          orgAutoAcceptEmail: "cal.com",
+          orgAutoAcceptEmail: "cal.dre.app",
         },
       });
       return team;

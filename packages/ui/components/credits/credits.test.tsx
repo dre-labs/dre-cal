@@ -18,11 +18,11 @@ describe("Tests for Credits component", () => {
 
     const creditsLinkElement = screen.getByRole("link", { name: /Cal\.com, Inc\./i });
     expect(creditsLinkElement).toBeInTheDocument();
-    expect(creditsLinkElement).toHaveAttribute("href", "https://go.cal.com/credits");
+    expect(creditsLinkElement).toHaveAttribute("href", "https://cal.dre.app/credits");
 
     const versionLinkElement = screen.getByRole("link", { name: /mockedVersion/i });
     expect(versionLinkElement).toBeInTheDocument();
-    expect(versionLinkElement).toHaveAttribute("href", "https://go.cal.com/releases");
+    expect(versionLinkElement).toHaveAttribute("href", "https://cal.dre.app/releases");
   });
 
   test("Should render credits section with correct text", () => {

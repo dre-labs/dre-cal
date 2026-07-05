@@ -8,9 +8,10 @@ import { CREDENTIAL_SYNC_SECRET, CREDENTIAL_SYNC_SECRET_HEADER_NAME } from "@cal
 import { APP_CREDENTIAL_SHARING_ENABLED } from "@calcom/lib/constants";
 import { symmetricDecrypt } from "@calcom/lib/crypto";
 import prisma from "@calcom/prisma";
+import process from "node:process";
 
 const appCredentialWebhookRequestBodySchema = z.object({
-  // UserId of the cal.com user
+  // UserId of the cal.dre.app user
   userId: z.number().int(),
   appSlug: z.string(),
   // Keys should be AES256 encrypted with the CALCOM_APP_CREDENTIAL_ENCRYPTION_KEY

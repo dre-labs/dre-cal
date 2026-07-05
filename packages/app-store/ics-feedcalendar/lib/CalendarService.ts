@@ -154,7 +154,7 @@ class ICSFeedCalendarService implements Calendar {
         //
         // commented out because a lot of public ICS feeds that describe stuff like
         // public holidays have them marked as transparent. if that is explicitly
-        // added to cal.com as an ICS feed, it should probably not be ignored.
+        // added to cal.dre.app as an ICS feed, it should probably not be ignored.
         // if (vevent?.getFirstPropertyValue("transp") === "TRANSPARENT") return;
 
         const event = new ICAL.Event(vevent);

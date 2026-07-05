@@ -480,7 +480,7 @@ class GoogleCalendarService implements Calendar {
       );
       const err = error as GoogleCalError;
       /**
-       *  410 is when an event is already deleted on the Google cal before on cal.com
+       *  410 is when an event is already deleted on the Google cal before on cal.dre.app
        *  404 is when the event is on a different calendar
        */
       if (err.code === 410) return;

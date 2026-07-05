@@ -154,7 +154,7 @@ describe("OrganizationBlockingService", () => {
       const exactDomainEntry = {
         id: "789",
         type: WatchlistType.DOMAIN,
-        value: "cal.com",
+        value: "cal.dre.app",
         description: null,
         action: WatchlistAction.BLOCK,
         isGlobal: false,
@@ -165,12 +165,12 @@ describe("OrganizationBlockingService", () => {
 
       vi.mocked(mockOrgRepo.findBlockingEntriesForEmailsAndDomains).mockResolvedValue([exactDomainEntry]);
 
-      const result = await service.isBlocked("user@app.cal.com", ORGANIZATION_ID);
+      const result = await service.isBlocked("user@cal.dre.app", ORGANIZATION_ID);
 
       expect(result.isBlocked).toBe(false);
       expect(mockOrgRepo.findBlockingEntriesForEmailsAndDomains).toHaveBeenCalledWith({
-        emails: ["user@app.cal.com"],
-        domains: ["app.cal.com", "*.cal.com"],
+        emails: ["user@cal.dre.app"],
+        domains: ["cal.dre.app", "*.cal.dre.app"],
         organizationId: ORGANIZATION_ID,
       });
     });
@@ -179,7 +179,7 @@ describe("OrganizationBlockingService", () => {
       const wildcardEntry = {
         id: "789",
         type: WatchlistType.DOMAIN,
-        value: "*.cal.com",
+        value: "*.cal.dre.app",
         description: null,
         action: WatchlistAction.BLOCK,
         isGlobal: false,
@@ -190,7 +190,7 @@ describe("OrganizationBlockingService", () => {
 
       vi.mocked(mockOrgRepo.findBlockingEntriesForEmailsAndDomains).mockResolvedValue([wildcardEntry]);
 
-      const result = await service.isBlocked("user@app.cal.com", ORGANIZATION_ID);
+      const result = await service.isBlocked("user@cal.dre.app", ORGANIZATION_ID);
 
       expect(result.isBlocked).toBe(true);
       expect(result.reason).toBe(WatchlistType.DOMAIN);
@@ -201,7 +201,7 @@ describe("OrganizationBlockingService", () => {
       const wildcardEntry = {
         id: "789",
         type: WatchlistType.DOMAIN,
-        value: "*.app.cal.com",
+        value: "*.cal.dre.app",
         description: null,
         action: WatchlistAction.BLOCK,
         isGlobal: false,
@@ -212,14 +212,14 @@ describe("OrganizationBlockingService", () => {
 
       vi.mocked(mockOrgRepo.findBlockingEntriesForEmailsAndDomains).mockResolvedValue([wildcardEntry]);
 
-      const result = await service.isBlocked("user@sub.app.cal.com", ORGANIZATION_ID);
+      const result = await service.isBlocked("user@sub.cal.dre.app", ORGANIZATION_ID);
 
       expect(result.isBlocked).toBe(true);
       expect(result.reason).toBe(WatchlistType.DOMAIN);
       expect(result.watchlistEntry).toEqual(wildcardEntry);
       expect(mockOrgRepo.findBlockingEntriesForEmailsAndDomains).toHaveBeenCalledWith({
-        emails: ["user@sub.app.cal.com"],
-        domains: ["sub.app.cal.com", "*.app.cal.com"],
+        emails: ["user@sub.cal.dre.app"],
+        domains: ["sub.cal.dre.app", "*.cal.dre.app"],
         organizationId: ORGANIZATION_ID,
       });
     });
@@ -228,7 +228,7 @@ describe("OrganizationBlockingService", () => {
       const wildcardEntry = {
         id: "789",
         type: WatchlistType.DOMAIN,
-        value: "*.cal.com",
+        value: "*.cal.dre.app",
         description: null,
         action: WatchlistAction.BLOCK,
         isGlobal: false,
@@ -239,7 +239,7 @@ describe("OrganizationBlockingService", () => {
 
       vi.mocked(mockOrgRepo.findBlockingEntriesForEmailsAndDomains).mockResolvedValue([wildcardEntry]);
 
-      const result = await service.isBlocked("user@cal.com", ORGANIZATION_ID);
+      const result = await service.isBlocked("user@cal.dre.app", ORGANIZATION_ID);
 
       expect(result.isBlocked).toBe(false);
     });
@@ -248,7 +248,7 @@ describe("OrganizationBlockingService", () => {
       const exactEntry = {
         id: "111",
         type: WatchlistType.DOMAIN,
-        value: "app.cal.com",
+        value: "cal.dre.app",
         description: null,
         action: WatchlistAction.BLOCK,
         isGlobal: false,
@@ -260,7 +260,7 @@ describe("OrganizationBlockingService", () => {
       const wildcardEntry = {
         id: "222",
         type: WatchlistType.DOMAIN,
-        value: "*.cal.com",
+        value: "*.cal.dre.app",
         description: null,
         action: WatchlistAction.BLOCK,
         isGlobal: false,
@@ -274,7 +274,7 @@ describe("OrganizationBlockingService", () => {
         wildcardEntry,
       ]);
 
-      const result = await service.isBlocked("user@app.cal.com", ORGANIZATION_ID);
+      const result = await service.isBlocked("user@cal.dre.app", ORGANIZATION_ID);
 
       expect(result.isBlocked).toBe(true);
       expect(result.reason).toBe(WatchlistType.DOMAIN);

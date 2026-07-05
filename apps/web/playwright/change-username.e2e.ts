@@ -6,7 +6,7 @@ import { IS_STRIPE_ENABLED, submitAndWaitForResponse } from "./lib/testUtils";
 test.describe.configure({ mode: "parallel" });
 
 const IS_SELF_HOSTED = !(
-  new URL(WEBAPP_URL).hostname.endsWith(".cal.dev") || !!new URL(WEBAPP_URL).hostname.endsWith(".cal.com")
+  new URL(WEBAPP_URL).hostname.endsWith(".cal.dev") || !!new URL(WEBAPP_URL).hostname.endsWith(".cal.dre.app")
 );
 
 const TESTING_USERNAMES = [
@@ -83,5 +83,4 @@ test.describe("Change username on settings", () => {
 
     await expect(page).toHaveURL(/.*checkout.stripe.com/);
   });
-
 });

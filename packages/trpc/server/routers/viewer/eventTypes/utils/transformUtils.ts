@@ -3,11 +3,12 @@ import { getUserAvatarUrl } from "@calcom/lib/getAvatarUrl";
 import type { MembershipRole } from "@calcom/prisma/enums";
 import { teamMetadataSchema } from "@calcom/prisma/zod-utils";
 import type { TeamPermissions } from "./permissionUtils";
+import process from "node:process";
 
 const getBookerBaseUrlSync = (_orgSlug?: string | number | null): string =>
-  process.env.NEXT_PUBLIC_WEBAPP_URL || "https://app.cal.com";
+  process.env.NEXT_PUBLIC_WEBAPP_URL || "https://cal.dre.app";
 const getBookerBaseUrl = async (_orgSlug?: string | number | null): Promise<string> =>
-  process.env.NEXT_PUBLIC_WEBAPP_URL || "https://app.cal.com";
+  process.env.NEXT_PUBLIC_WEBAPP_URL || "https://cal.dre.app";
 
 export interface EventTypeGroup {
   teamId?: number | null;

@@ -1,15 +1,13 @@
 import crypto from "node:crypto";
-import type { NextApiRequest, NextApiResponse } from "next";
-import getRawBody from "raw-body";
-import { z } from "zod";
-
 import { handlePaymentSuccess } from "@calcom/app-store/_utils/payments/handlePaymentSuccess";
-import { distributedTracing } from "@calcom/lib/tracing/factory";
+import { PrismaBookingPaymentRepository as BookingPaymentRepository } from "@calcom/features/bookings/repositories/PrismaBookingPaymentRepository";
 import { IS_PRODUCTION } from "@calcom/lib/constants";
 import { HttpError as HttpCode } from "@calcom/lib/http-error";
 import { getServerErrorFromUnknown } from "@calcom/lib/server/getServerErrorFromUnknown";
-import { PrismaBookingPaymentRepository as BookingPaymentRepository } from "@calcom/features/bookings/repositories/PrismaBookingPaymentRepository";
-
+import { distributedTracing } from "@calcom/lib/tracing/factory";
+import type { NextApiRequest, NextApiResponse } from "next";
+import getRawBody from "raw-body";
+import { z } from "zod";
 import appConfig from "../config.json";
 import { btcpayCredentialKeysSchema } from "../lib/btcpayCredentialKeysSchema";
 
@@ -63,18 +61,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data.invoiceId,
       appConfig.type
     );
-    if (!payment) throw new HttpCode({ statusCode: 404, message: "Cal.diy: payment not found" });
+    if (!payment) throw new HttpCode({ statusCode: 404, message: "DRE Cal: payment not found" });
     if (payment.success) return res.status(200).send({ message: "Payment already registered" });
     const key = payment.booking?.user?.credentials?.[0].key;
-    if (!key) throw new HttpCode({ statusCode: 404, message: "Cal.diy: credentials not found" });
+    if (!key) throw new HttpCode({ statusCode: 404, message: "DRE Cal: credentials not found" });
 
     const parsedKey = btcpayCredentialKeysSchema.safeParse(key);
     if (!parsedKey.success)
-      throw new HttpCode({ statusCode: 400, message: "Cal.diy: Invalid BTCPay credentials" });
+      throw new HttpCode({ statusCode: 400, message: "DRE Cal: Invalid BTCPay credentials" });
 
     const { webhookSecret, storeId } = parsedKey.data;
     if (storeId !== data.storeId)
-      throw new HttpCode({ statusCode: 400, message: "Cal.diy: Store ID mismatch" });
+      throw new HttpCode({ statusCode: 400, message: "DRE Cal: Store ID mismatch" });
 
     const expectedSignature = signature.split("=")[1];
     const computedSignature = verifyBTCPaySignature(rawBody, expectedSignature, webhookSecret);

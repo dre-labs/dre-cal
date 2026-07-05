@@ -2,8 +2,8 @@
   "name": "@calcom/feature-auth",
   "sideEffects": false,
   "private": true,
-  "description": "Cal.diy's main auth code",
-  "authors": "Cal.com, Inc.",
+  "description": "DRE Cal's main auth code",
+  "authors": "DRE Cal",
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {

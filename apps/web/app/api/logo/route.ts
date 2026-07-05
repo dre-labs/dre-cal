@@ -111,7 +111,7 @@ function isValidLogoType(type: string): type is LogoType {
 async function getTeamLogos(subdomain: string, isValidOrgDomain: boolean) {
   try {
     if (
-      // if not cal.com
+      // if not cal.dre.app
       IS_SELF_HOSTED ||
       // missing subdomain (empty string)
       !subdomain ||
@@ -183,7 +183,7 @@ async function getHandler(request: NextRequest) {
   const [subdomain] = domains;
   const teamLogos = await getTeamLogos(subdomain, isValidOrgDomain);
 
-  // Resolve all icon types to team logos, falling back to Cal.diy defaults.
+  // Resolve all icon types to team logos, falling back to DRE Cal defaults.
   const type: LogoType = parsedQuery?.type && isValidLogoType(parsedQuery.type) ? parsedQuery.type : "logo";
   const logoDefinition = logoDefinitions[type];
   const filteredLogo = teamLogos[logoDefinition.source] ?? logoDefinition.fallback;

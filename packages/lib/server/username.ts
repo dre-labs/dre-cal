@@ -9,6 +9,7 @@ import { RedirectType } from "@calcom/prisma/enums";
 import { IS_PREMIUM_USERNAME_ENABLED } from "../constants";
 import logger from "../logger";
 import notEmpty from "../notEmpty";
+import process from "node:process";
 
 const log = logger.getSubLogger({ prefix: ["server/username"] });
 const cachedData: Set<string> = new Set();
@@ -52,7 +53,7 @@ export const isPremiumUserName = IS_PREMIUM_USERNAME_ENABLED
   ? async (username: string) => {
       return username.length <= 4 || isBlacklisted(username);
     }
-  : // outside of cal.com the concept of premium username needs not exist.
+  : // outside of cal.dre.app the concept of premium username needs not exist.
     () => Promise.resolve(false);
 
 export const generateUsernameSuggestion = async (users: string[], username: string) => {

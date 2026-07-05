@@ -74,9 +74,9 @@ describe("appByIdHandler", () => {
       slug: "daily-video",
       categories: ["conferencing"],
       logo: "icon.svg",
-      publisher: "Cal.diy",
+      publisher: "DRE Cal",
       url: "https://daily.co",
-      email: "help@cal.com",
+      email: "support@dre.app",
       isGlobal: true,
       // This is the sensitive key that should NOT be exposed
       key: { apikey: secretApiKey },

@@ -9,7 +9,7 @@ import type { EventTypeGroup } from "./transformUtils";
 describe("EventTypeGroupFilter", () => {
   const mockUserGroup: EventTypeGroup = {
     teamId: null,
-    bookerUrl: "https://cal.com/user",
+    bookerUrl: "https://cal.dre.app/user",
     membershipRole: null,
     profile: {
       slug: "user",
@@ -24,7 +24,7 @@ describe("EventTypeGroupFilter", () => {
 
   const mockTeamGroup1: EventTypeGroup = {
     teamId: 1,
-    bookerUrl: "https://cal.com/team1",
+    bookerUrl: "https://cal.dre.app/team1",
     membershipRole: MembershipRole.ADMIN,
     profile: {
       slug: "team1",
@@ -39,7 +39,7 @@ describe("EventTypeGroupFilter", () => {
 
   const mockTeamGroup2: EventTypeGroup = {
     teamId: 2,
-    bookerUrl: "https://cal.com/team2",
+    bookerUrl: "https://cal.dre.app/team2",
     membershipRole: MembershipRole.MEMBER,
     profile: {
       slug: "team2",

@@ -1,8 +1,6 @@
+import { APP_NAME, COMPANY_NAME, WEBAPP_URL } from "@calcom/lib/constants";
 import type { TFunction } from "i18next";
-
-import { WEBAPP_URL, APP_NAME, COMPANY_NAME } from "@calcom/lib/constants";
-
-import { V2BaseEmailHtml, CallToAction } from "../components";
+import { CallToAction, V2BaseEmailHtml } from "../components";
 
 interface DailyVideoDownloadRecordingEmailProps {
   language: TFunction;
@@ -89,7 +87,7 @@ export const DailyVideoDownloadRecordingEmail = (
 
       <p style={{ fontWeight: 500, lineHeight: "20px", marginTop: "8px" }}>
         {props.language("link_valid_for_12_hrs_description")}{" "}
-        <a href="https://cal.com/docs/enterprise-features/teams/cal-video-recordings">
+        <a href="https://cal.dre.app/docs/enterprise-features/teams/cal-video-recordings">
           {props.language("here")}
         </a>
       </p>

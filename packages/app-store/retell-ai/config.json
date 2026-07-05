@@ -4,11 +4,9 @@
   "slug": "retell-ai",
   "type": "retell-ai_automation",
   "logo": "icon-dark.svg",
-  "url": "https://go.cal.com/retellai",
+  "url": "https://cal.dre.app/retellai",
   "variant": "automation",
-  "categories": [
-    "automation"
-  ],
+  "categories": ["automation"],
   "publisher": "Retell AI",
   "email": "founders@retellai.com",
   "description": "Supercharge your Call Operations with AI \r",
@@ -16,7 +14,7 @@
   "__createdUsingCli": true,
   "__template": "link-as-an-app",
   "externalLink": {
-    "url": "https://go.cal.com/retellai",
+    "url": "https://cal.dre.app/retellai",
     "newTab": true
   }
 }

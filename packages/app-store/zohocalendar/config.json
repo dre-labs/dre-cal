@@ -8,8 +8,8 @@
   "category": "calendar",
   "categories": ["calendar"],
   "logo": "icon.svg",
-  "publisher": "Cal.diy",
-  "url": "https://cal.com/",
-  "email": "help@cal.com",
+  "publisher": "DRE Cal",
+  "url": "https://cal.dre.app/",
+  "email": "support@dre.app",
   "isAuth": true
 }

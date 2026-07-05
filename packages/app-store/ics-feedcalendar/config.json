@@ -7,9 +7,9 @@
   "logo": "icon.svg",
   "variant": "calendar",
   "categories": ["calendar"],
-  "publisher": "Cal.com, Inc.",
-  "email": "help@cal.com",
-  "description": "Import events from an ICS Feed into [Cal.diy](https://cal.com).",
+  "publisher": "DRE Cal",
+  "email": "support@dre.app",
+  "description": "Import events from an ICS Feed into [DRE Cal](https://cal.dre.app/).",
   "isTemplate": false,
   "__createdUsingCli": true
 }

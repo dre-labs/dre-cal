@@ -22,7 +22,7 @@ export async function resizeBase64Image(
   const buffer = Buffer.from(base64OrUrl.replace(/^data:image\/\w+;base64,/, ""), "base64");
 
   const {
-    // 96px is the height of the image on https://cal.com/peer
+    // 96px is the height of the image on https://cal.dre.app/peer
     maxSize = 96 * 4,
   } = opts ?? {};
   const image = await jimp.read(buffer);

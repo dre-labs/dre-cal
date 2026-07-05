@@ -35,7 +35,10 @@ jest.mock("@calcom/platform-libraries/app-store", () => {
 
 import { AppModule } from "@/app.module";
 import { bootstrap } from "@/bootstrap";
-import { CreateIcsFeedOutput, CreateIcsFeedOutputResponseDto } from "@/platform/calendars/input/create-ics.output";
+import {
+  CreateIcsFeedOutput,
+  CreateIcsFeedOutputResponseDto,
+} from "@/platform/calendars/input/create-ics.output";
 import { ConnectedCalendarsData } from "@/platform/calendars/outputs/connected-calendars.output";
 import { DeletedCalendarCredentialsOutputResponseDto } from "@/platform/calendars/outputs/delete-calendar-credentials.output";
 import { CalendarsService } from "@/platform/calendars/services/calendars.service";
@@ -144,7 +147,7 @@ describeCalendars("Platform Calendars Endpoints", () => {
 
   it(`/GET/v2/calendars/${GOOGLE_CALENDAR}/connect: it should redirect to auth-url for google calendar OAuth with valid access token `, async () => {
     const response = await request(app.getHttpServer())
-      .get(`/v2/calendars/${GOOGLE_CALENDAR}/connect?redir=https://cal.com&isDryRun=false`)
+      .get(`/v2/calendars/${GOOGLE_CALENDAR}/connect?redir=https://cal.dre.app&isDryRun=false`)
       .set("Authorization", `Bearer ${accessTokenSecret}`)
       .set("Origin", CLIENT_REDIRECT_URI)
       .expect(200);
@@ -218,7 +221,7 @@ describeCalendars("Platform Calendars Endpoints", () => {
 
   it(`/POST/v2/calendars/${ICS_CALENDAR}/save with access token should fail to create a new ics feed calendar credentials with invalid urls`, async () => {
     const body = {
-      urls: ["https://cal.com/ics/feed.ics", "https://not-an-ics-feed.com"],
+      urls: ["https://cal.dre.app/ics/feed.ics", "https://not-an-ics-feed.com"],
       readOnly: false,
     };
     await request(app.getHttpServer())
@@ -231,7 +234,7 @@ describeCalendars("Platform Calendars Endpoints", () => {
 
   it(`/POST/v2/calendars/${ICS_CALENDAR}/save with access token should create a new ics feed calendar credentials`, async () => {
     const body = {
-      urls: ["https://cal.com/ics/feed.ics"],
+      urls: ["https://cal.dre.app/ics/feed.ics"],
       readOnly: false,
     };
     mockBuildIcsFeedCalendarService.mockReturnValue({

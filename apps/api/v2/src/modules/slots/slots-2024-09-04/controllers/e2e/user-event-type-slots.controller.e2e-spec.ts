@@ -79,7 +79,7 @@ describe("Slots 2024-09-04 Endpoints", () => {
 
     let reservedSlot: ReserveSlotOutputData_2024_09_04;
 
-    const oooTestUserEmail = `oooTestUser-${randomString()}@cal.com`;
+    const oooTestUserEmail = `oooTestUser-${randomString()}@cal.dre.app`;
 
     beforeAll(async () => {
       const moduleRef = await Test.createTestingModule({

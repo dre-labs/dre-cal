@@ -19,7 +19,7 @@ vi.mock("../../../lib/getStripeAppKeys", () => ({
 }));
 
 vi.mock("@calcom/lib/constants", () => ({
-  WEBAPP_URL: "https://app.cal.com",
+  WEBAPP_URL: "https://cal.dre.app",
 }));
 
 import { getServerSession } from "@calcom/features/auth/lib/getServerSession";
@@ -27,6 +27,7 @@ import prisma from "@calcom/prisma";
 
 import { getStripeAppKeys } from "../../../lib/getStripeAppKeys";
 import { getServerSideProps } from "../_getServerSideProps";
+import process from "node:process";
 
 const mockGetServerSession = vi.mocked(getServerSession);
 const mockPrisma = prisma as unknown as {
@@ -187,7 +188,7 @@ describe("Stripe Setup Page getServerSideProps", () => {
 
       const redirect = (result as { redirect: { destination: string; permanent: boolean } }).redirect;
       expect(redirect.destination).toContain(
-        encodeURIComponent("https://app.cal.com/api/integrations/stripepayment/callback")
+        encodeURIComponent("https://cal.dre.app/api/integrations/stripepayment/callback")
       );
     });
 
@@ -203,7 +204,7 @@ describe("Stripe Setup Page getServerSideProps", () => {
       const stateStr = decodeURIComponent(stateMatch![1]);
       const state = JSON.parse(stateStr);
       expect(state.fromApp).toBe(true);
-      expect(state.onErrorReturnTo).toBe("https://app.cal.com/apps/installed/payment");
+      expect(state.onErrorReturnTo).toBe("https://cal.dre.app/apps/installed/payment");
       expect(state.returnTo).toBeUndefined();
     });
 
@@ -272,7 +273,7 @@ describe("Stripe Setup Page getServerSideProps", () => {
 
       expect(result).toEqual({
         redirect: {
-          destination: "https://app.cal.com/apps/installed/payment?error=stripe_oauth_failed",
+          destination: "https://cal.dre.app/apps/installed/payment?error=stripe_oauth_failed",
           permanent: false,
         },
       });

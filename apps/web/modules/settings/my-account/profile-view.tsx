@@ -41,6 +41,7 @@ import { useRef, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { CompanyEmailOrganizationBanner } from "./components/CompanyEmailOrganizationBanner";
+import process from "node:process";
 
 interface DeleteAccountValues {
   totpCode: string;
@@ -145,7 +146,7 @@ const ProfileView = ({ user }: Props) => {
     showToast(t("Your account was deleted"), "success");
 
     setHasDeleteErrors(false); // dismiss any open errors
-    if (process.env.NEXT_PUBLIC_WEBAPP_URL === "https://app.cal.com") {
+    if (process.env.NEXT_PUBLIC_WEBAPP_URL === "https://cal.dre.app") {
       signOut({ callbackUrl: "/auth/logout?survey=true" });
     } else {
       signOut({ callbackUrl: "/auth/logout" });

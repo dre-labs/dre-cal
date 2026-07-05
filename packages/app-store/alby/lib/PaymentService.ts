@@ -51,7 +51,7 @@ class AlbyPaymentService implements IAbstractPaymentService {
       const invoice = await lightningAddress.requestInvoice({
         satoshi: payment.amount,
         payerdata: {
-          appId: "cal.com",
+          appId: "cal.dre.app",
           referenceId: uid,
         },
       });

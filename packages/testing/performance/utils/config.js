@@ -2,7 +2,7 @@ import { sleep } from "k6";
 import { SharedArray } from "k6/data";
 
 export const BASE_URL = __ENV.BASE_URL || "http://localhost:3000";
-if (BASE_URL.includes("cal.com")) {
+if (BASE_URL.includes("cal.dre.app")) {
   throw new Error("BLOCKED: Do not run against production domain");
 }
 

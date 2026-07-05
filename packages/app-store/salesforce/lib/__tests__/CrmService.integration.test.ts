@@ -30,7 +30,7 @@ vi.mock("@urql/core", () => ({
 
 vi.mock("@calcom/lib/constants", () => {
   return {
-    WEBAPP_URL: "https://app.cal.com",
+    WEBAPP_URL: "https://cal.dre.app",
     APP_CREDENTIAL_SHARING_ENABLED: false,
     IS_PRODUCTION: false,
   };
@@ -39,7 +39,9 @@ vi.mock("@calcom/lib/constants", () => {
 vi.mock("@jsforce/jsforce-node", () => {
   return {
     default: {
-      Connection: vi.fn().mockImplementation(function() { return {}; }),
+      Connection: vi.fn().mockImplementation(function () {
+        return {};
+      }),
     },
   };
 });
@@ -129,8 +131,8 @@ describe("SalesforceCRMService", () => {
     );
     // Override jsforce mock with our custom mock
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore - Not full implementation of jsforce.Connection
-    vi.mocked(jsforce.Connection).mockImplementation(function() {
+    // @ts-expect-error - Not full implementation of jsforce.Connection
+    vi.mocked(jsforce.Connection).mockImplementation(function () {
       return {
         ...salesforceMock.mockConnection,
         version: "1.0",

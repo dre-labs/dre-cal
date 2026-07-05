@@ -1,7 +1,7 @@
-import { DeploymentsRepository } from "@/modules/deployments/deployments.repository";
-import { RedisService } from "@/modules/redis/redis.service";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { DeploymentsRepository } from "@/modules/deployments/deployments.repository";
+import { RedisService } from "@/modules/redis/redis.service";
 
 @Injectable()
 export class DeploymentsService {
@@ -11,7 +11,7 @@ export class DeploymentsService {
     private readonly redisService: RedisService
   ) {}
 
-  // Cal.diy is fully open source — no license key is required.
+  // DRE Cal is fully open source — no license key is required.
   async checkLicense() {
     return true;
   }

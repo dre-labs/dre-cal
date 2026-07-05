@@ -428,7 +428,7 @@ describe("Bookings Endpoints 2024-08-13", () => {
               expect(updatedAtDate?.getTime()).toBeGreaterThanOrEqual(beforeCreate.getTime());
               expect(updatedAtDate?.getTime()).toBeLessThanOrEqual(afterCreate.getTime());
 
-              expect(data.metadata).toEqual({...body.metadata, platformClientId: oAuthClient.id});
+              expect(data.metadata).toEqual({ ...body.metadata, platformClientId: oAuthClient.id });
               createdBooking = data;
             } else {
               throw new Error(
@@ -2028,7 +2028,7 @@ describe("Bookings Endpoints 2024-08-13", () => {
               expect(updatedAtDate?.getTime()).toBeGreaterThanOrEqual(beforeCreate.getTime());
               expect(updatedAtDate?.getTime()).toBeLessThanOrEqual(afterCreate.getTime());
 
-              expect(data.metadata).toEqual({...body.metadata, platformClientId: oAuthClient.id});
+              expect(data.metadata).toEqual({ ...body.metadata, platformClientId: oAuthClient.id });
               createdBooking = data;
             } else {
               throw new Error(
@@ -2041,7 +2041,7 @@ describe("Bookings Endpoints 2024-08-13", () => {
 
     describe("booking location", () => {
       const address = "123 Main St";
-      const link = "https://cal.com/join/123456";
+      const link = "https://cal.dre.app/join/123456";
       const phone = "+37121999999";
 
       let eventTypeWithAllLocationsId: number;
@@ -2502,9 +2502,7 @@ describe("Bookings Endpoints 2024-08-13", () => {
         jest
           .spyOn(eventManagerProto, "createAllCalendarEvents")
           .mockImplementation(() => Promise.resolve([]));
-        jest
-          .spyOn(eventManagerProto, "createAllCRMEvents")
-          .mockImplementation(() => Promise.resolve([]));
+        jest.spyOn(eventManagerProto, "createAllCRMEvents").mockImplementation(() => Promise.resolve([]));
       });
 
       describe("platform oAuth client has calendar events enabled", () => {

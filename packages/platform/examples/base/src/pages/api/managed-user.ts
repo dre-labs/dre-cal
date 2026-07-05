@@ -4,6 +4,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { X_CAL_CLIENT_ID, X_CAL_SECRET_KEY } from "@calcom/platform-constants";
 
 import prisma from "../../lib/prismaClient";
+import process from "node:process";
 
 type Data = {
   email: string;
@@ -55,7 +56,7 @@ async function createUserWithDefaultSchedule(email: string, name: string, avatar
   return managedUserResponseBody.data;
 }
 
-// example endpoint to create a managed cal.com user
+// example endpoint to create a managed cal.dre.app user
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
   const { emails } = JSON.parse(req.body);
   const emailOne = emails[0];
@@ -163,7 +164,7 @@ async function createTeam(orgId: number, name: string) {
       },
       body: JSON.stringify({
         name,
-        bannerUrl: "https://i.cal.com/api/avatar/949be534-7a88-4185-967c-c020b0c0bef3.png",
+        bannerUrl: "https://i.cal.dre.app/api/avatar/949be534-7a88-4185-967c-c020b0c0bef3.png",
       }),
     }
   );

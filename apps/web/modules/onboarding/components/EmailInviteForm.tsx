@@ -1,12 +1,10 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
-
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { Button } from "@calcom/ui/components/button";
-import { Label, TextField, Select } from "@calcom/ui/components/form";
+import { Label, Select, TextField } from "@calcom/ui/components/form";
 import { XIcon } from "@coss/ui/icons";
-
+import { useFormContext } from "react-hook-form";
 import type { InviteRole } from "../store/onboarding-store";
 
 type BaseInviteFormData = {
@@ -72,7 +70,7 @@ export function EmailInviteForm({
                 <TextField
                   labelSrOnly
                   {...register(`invites.${index}.email`)}
-                  placeholder={emailPlaceholder || `rick@cal.com`}
+                  placeholder={emailPlaceholder || `rick@example.com`}
                   type="email"
                   size="sm"
                 />

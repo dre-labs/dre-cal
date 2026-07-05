@@ -68,7 +68,7 @@ export type KnownConfig = {
   "ui.autoscroll"?: "true" | "false";
   theme?: EmbedThemeConfig;
   // Prefixing with cal.embed because there could be more query params that aren't required by embed and are used for things like prefilling booking form, configuring dry run, and some other params simply to be forwarded to the booking success redirect URL.
-  // There are some cal. prefixed query params as well, not meant for embed specifically, but in general for cal.com
+  // There are some cal. prefixed query params as well, not meant for embed specifically, but in general for cal.dre.app
   "cal.embed.pageType"?: EmbedPageType;
   // If true, then when doing a "connect" with pre-rendered iframe, we won't fetch slots. This is useful when we are reusing the iframe fully as is.
   "cal.embed.noSlotsFetchOnConnect"?: "true" | "false";

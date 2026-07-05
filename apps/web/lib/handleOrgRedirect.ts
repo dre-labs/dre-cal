@@ -114,8 +114,8 @@ interface HandleOrgRedirectParams {
  * Handles organization redirects for both regular org context and SINGLE_ORG_SLUG mode
  * The redirect is required for all existing user links and team links to keep working when a user/team is moved to an organization
  * Example:
- * - User "john87" is added to organization "acme" and his username in the organization is "john". So, cal.com/john87 is redirected to cal.com/john
- * - Team "acme-sales" is added to organization "acme" and its slug in the organization is "sales". So, cal.com/acme-sales is redirected to cal.com/sales
+ * - User "john87" is added to organization "acme" and his username in the organization is "john". So, cal.dre.app/john87 is redirected to cal.dre.app/john
+ * - Team "acme-sales" is added to organization "acme" and its slug in the organization is "sales". So, cal.dre.app/acme-sales is redirected to cal.dre.app/sales
  *
  * Returns a redirect object if a redirect is needed, null otherwise
  */

@@ -163,7 +163,7 @@ const deleteMeeting = async (
   return Promise.resolve({});
 };
 
-// @TODO: This is a temporary solution to create a meeting with cal.com video as fallback url
+// @TODO: This is a temporary solution to create a meeting with cal.dre.app video as fallback url
 const createMeetingWithCalVideo = async (calEvent: CalendarEvent) => {
   let dailyAppKeys: Awaited<ReturnType<typeof getDailyAppKeys>>;
   try {

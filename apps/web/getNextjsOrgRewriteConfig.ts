@@ -1,11 +1,12 @@
+import process from "node:process";
 const isSingleOrgModeEnabled = !!process.env.NEXT_PUBLIC_SINGLE_ORG_SLUG;
 const orgSlugCaptureGroupName = "orgSlug";
 
 /**
  * Returns the leftmost subdomain from a given URL.
  * It needs the URL domain to have atleast two dots.
- * app.cal.com -> app
- * app.company.cal.com -> app
+ * cal.dre.app -> app
+ * app.company.cal.dre.app -> app
  * app.company.com -> app
  */
 const getLeftMostSubdomain = (url: string): string | null => {
@@ -34,7 +35,7 @@ export interface NextJsOrgRewriteConfig {
   disableRootEmbedPathRewrite: boolean;
 }
 
-// For app.cal.com, it will match all domains that are not starting with "app". Technically we would want to match domains like acme.cal.com, dunder.cal.com and not app.cal.com
+// For cal.dre.app, it will match all domains that are not starting with "app". Technically we would want to match domains like acme.cal.dre.app, dunder.cal.dre.app and not cal.dre.app
 export const getRegExpThatMatchesAllOrgDomains = ({ webAppUrl }: { webAppUrl: string }): string => {
   if (isSingleOrgModeEnabled) {
     console.log("Single-Org-Mode enabled - Consider all domains to be org domains");

@@ -14,7 +14,7 @@ export const metadata = {
   publisher: "",
   url: "",
   isGlobal: false,
-  email: "help@cal.com",
+  email: "support@dre.app",
   appData: {
     location: {
       linkType: "dynamic",

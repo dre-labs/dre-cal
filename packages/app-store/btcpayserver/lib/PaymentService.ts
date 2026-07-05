@@ -101,7 +101,7 @@ class BTCPayServerPaymentService implements IAbstractPaymentService {
         metadata: {
           orderId: `cal-booking-${bookingId}`,
           itemDesc: bookingTitle || `Booking #${bookingId}`,
-          appId: "cal.com",
+          appId: "cal.dre.app",
           referenceId: uid,
           customerName: bookerName,
           customerEmail: bookerEmail,

@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { EmbedTheme } from "@calcom/features/embed/lib/constants";
 
-const enum ThemeSupport {
+enum ThemeSupport {
   // e.g. Login Page
   None = "none",
   // Entire App except Booking Pages
@@ -53,8 +53,8 @@ export function getUniqueIdentifierForBookingPage({ pathname }: { pathname: stri
  * So, we handle all the cases here namely,
  * - Both Booking Pages, /free/30min and /pro/30min but configured with different themes but being operated together.
  * - Embeds using different namespace. They can be completely themed different on the same page.
- * - Embeds using the same namespace but showing different cal.com links with different themes
- * - Embeds using the same namespace and showing same cal.com links with different themes(Different theme is possible for same cal.com link in case of embed because of theme config available in embed)
+ * - Embeds using the same namespace but showing different cal.dre.app links with different themes
+ * - Embeds using the same namespace and showing same cal.dre.app links with different themes(Different theme is possible for same cal.dre.app link in case of embed because of theme config available in embed)
  * - App has different theme then Booking Pages.
  *
  * All the above cases have one thing in common, which is the origin and thus localStorage is shared and thus `storageKey` is critical to avoid theme flickering.

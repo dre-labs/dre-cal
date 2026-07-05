@@ -92,7 +92,7 @@ const generateIcsString = ({
   };
 
   if (event.hideOrganizerEmail && !isOrganizerExempt) {
-    organizer.email = "no-reply@cal.com";
+    organizer.email = "no-reply@cal.dre.app";
   }
 
   const teamAttendees =

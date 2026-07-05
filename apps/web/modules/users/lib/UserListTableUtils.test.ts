@@ -55,7 +55,7 @@ function createMockTable(data: UserTableUser[]): Table<UserTableUser> {
 }
 
 describe("generate Csv for Org Users Table", () => {
-  const orgDomain = "https://acme.cal.com";
+  const orgDomain = "https://acme.cal.dre.app";
   const mockAttributeIds = ["attr1", "attr2"];
   const mockUser: UserTableUser = {
     id: 1,
@@ -120,7 +120,7 @@ describe("generate Csv for Org Users Table", () => {
 
     expect(csv).toMatchInlineSnapshot(`
       "Members,Link,Role,Teams,Attribute 1,Attribute 2
-      test@example.com,https://acme.cal.com/testuser,MEMBER,Team1,value1,"
+      test@example.com,https://acme.cal.dre.app/testuser,MEMBER,Team1,value1,"
     `);
   });
 
@@ -156,7 +156,7 @@ describe("generate Csv for Org Users Table", () => {
 
     expect(csv).toMatchInlineSnapshot(`
       "Members,Link,Role,Teams,Attribute 1,Attribute 2
-      test@example.com,https://acme.cal.com/testuser,MEMBER,Team1,"value1,value2","
+      test@example.com,https://acme.cal.dre.app/testuser,MEMBER,Team1,"value1,value2","
     `);
   });
 
@@ -182,7 +182,7 @@ describe("generate Csv for Org Users Table", () => {
 
     expect(csv).toMatchInlineSnapshot(`
       "Members,Link,Role,Teams,Attribute 1,Attribute 2
-      test@example.com,https://acme.cal.com/testuser,MEMBER,"Team1,Team2",,"
+      test@example.com,https://acme.cal.dre.app/testuser,MEMBER,"Team1,Team2",,"
     `);
   });
 
@@ -212,7 +212,7 @@ describe("generate Csv for Org Users Table", () => {
 
     expect(csv).toMatchInlineSnapshot(`
       "Members,Link,Role,Teams,Attribute 1,Attribute 2
-      test@example.com,https://acme.cal.com/testuser,MEMBER,"Team,1","value,1","
+      test@example.com,https://acme.cal.dre.app/testuser,MEMBER,"Team,1","value,1","
     `);
   });
 
@@ -235,9 +235,9 @@ describe("generate Csv for Org Users Table", () => {
 
     expect(csv).toMatchInlineSnapshot(`
       "Members,Link,Role,Teams,Attribute 1,Attribute 2
-      owner@example.com,https://acme.cal.com/owner,OWNER,,,
-      admin@example.com,https://acme.cal.com/admin,ADMIN,,,
-      member@example.com,https://acme.cal.com/member,MEMBER,,,"
+      owner@example.com,https://acme.cal.dre.app/owner,OWNER,,,
+      admin@example.com,https://acme.cal.dre.app/admin,ADMIN,,,
+      member@example.com,https://acme.cal.dre.app/member,MEMBER,,,"
     `);
   });
 
@@ -260,7 +260,7 @@ describe("generate Csv for Org Users Table", () => {
 
     expect(csv).toMatchInlineSnapshot(`
       "Members,Link,Role,Teams,Attribute 1,Attribute 2
-      test@example.com,https://acme.cal.com/testuser,MEMBER,,,"
+      test@example.com,https://acme.cal.dre.app/testuser,MEMBER,,,"
     `);
   });
 });

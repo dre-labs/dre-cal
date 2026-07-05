@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 import dayjs from "@calcom/dayjs";
 import logger from "@calcom/lib/logger";
 import { prisma } from "@calcom/prisma";
@@ -8,7 +6,7 @@ import type { CalendarEvent } from "@calcom/types/Calendar";
 import type { CredentialPayload } from "@calcom/types/Credential";
 import type { PartialReference } from "@calcom/types/EventManager";
 import type { VideoApiAdapter, VideoCallData } from "@calcom/types/VideoApiAdapter";
-
+import { z } from "zod";
 import refreshOAuthTokens from "../../_utils/oauth/refreshOAuthTokens";
 import { getWebexAppKeys } from "./getWebexAppKeys";
 
@@ -82,7 +80,7 @@ const webexAuth = (credential: CredentialPayload) => {
 
     if (responseBody.error) {
       if (responseBody.error === "invalid_grant") {
-        return Promise.reject(new Error("Invalid grant for Cal.diy webex app"));
+        return Promise.reject(new Error("Invalid grant for DRE Cal webex app"));
       }
     }
     // We check the if the new credentials matches the expected response structure
@@ -188,7 +186,7 @@ const WebexVideoApiAdapter = (credential: CredentialPayload): VideoApiAdapter =>
       if (response.error) {
         if (response.error === "invalid_grant") {
           await invalidateCredential(credential.id);
-          return Promise.reject(new Error("Invalid grant for Cal.diy webex app"));
+          return Promise.reject(new Error("Invalid grant for DRE Cal webex app"));
         }
       }
 
@@ -214,7 +212,7 @@ const WebexVideoApiAdapter = (credential: CredentialPayload): VideoApiAdapter =>
         if (response.error) {
           if (response.error === "invalid_grant") {
             await invalidateCredential(credential.id);
-            return Promise.reject(new Error("Invalid grant for Cal.diy webex app"));
+            return Promise.reject(new Error("Invalid grant for DRE Cal webex app"));
           }
         }
         logger.debug("Webex meeting deleted", { meetingId: uid });
@@ -235,7 +233,7 @@ const WebexVideoApiAdapter = (credential: CredentialPayload): VideoApiAdapter =>
       if (response.error) {
         if (response.error === "invalid_grant") {
           await invalidateCredential(credential.id);
-          return Promise.reject(new Error("Invalid grant for Cal.diy webex app"));
+          return Promise.reject(new Error("Invalid grant for DRE Cal webex app"));
         }
       }
 

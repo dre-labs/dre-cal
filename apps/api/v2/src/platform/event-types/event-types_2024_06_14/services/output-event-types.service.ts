@@ -460,7 +460,7 @@ export class OutputEventTypesService_2024_06_14 {
 
     // Don't use org subdomain for platform organizations - they don't have public-facing subdomains
     const orgSlug = !isPlatformOrg && org?.slug ? org.slug : null;
-    // getBookerBaseUrlSync(null) returns WEBSITE_URL (https://cal.com)
+    // getBookerBaseUrlSync(null) returns WEBSITE_URL (https://cal.dre.app)
     const baseUrl = getBookerBaseUrlSync(orgSlug);
     const normalizedBaseUrl = baseUrl.replace(/\/$/, "");
 

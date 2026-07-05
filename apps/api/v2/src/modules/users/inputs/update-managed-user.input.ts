@@ -1,11 +1,10 @@
-import { Locales } from "@/lib/enums/locales";
-import { CapitalizeTimeZone } from "@/lib/inputs/capitalize-timezone";
-import { TimeFormat, WeekDay } from "@/modules/users/inputs/create-managed-user.input";
+import { ValidateMetadata } from "@calcom/platform-types";
 import { ApiPropertyOptional } from "@nestjs/swagger";
 import { Transform, Type } from "class-transformer";
 import { IsEnum, IsIn, IsNumber, IsObject, IsOptional, IsString, IsTimeZone, IsUrl } from "class-validator";
-
-import { ValidateMetadata } from "@calcom/platform-types";
+import { Locales } from "@/lib/enums/locales";
+import { CapitalizeTimeZone } from "@/lib/inputs/capitalize-timezone";
+import { TimeFormat, WeekDay } from "@/modules/users/inputs/create-managed-user.input";
 
 export class UpdateManagedUserInput {
   @IsString()
@@ -54,7 +53,7 @@ export class UpdateManagedUserInput {
   @IsOptional()
   @ApiPropertyOptional({
     type: String,
-    example: "https://cal.com/api/avatar/2b735186-b01b-46d3-87da-019b8f61776b.png",
+    example: "https://cal.dre.app/api/avatar/2b735186-b01b-46d3-87da-019b8f61776b.png",
     description: `URL of the user's avatar image`,
   })
   avatarUrl?: string;

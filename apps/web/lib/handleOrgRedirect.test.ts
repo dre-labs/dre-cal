@@ -393,12 +393,12 @@ describe("handleOrgRedirect", () => {
         redirects: [
           {
             from: "user1",
-            toUrl: "https://org1.cal.com/john",
+            toUrl: "https://org1.cal.dre.app/john",
             type: RedirectType.User,
           },
           {
             from: "user2",
-            toUrl: "https://org1.cal.com/jane",
+            toUrl: "https://org1.cal.dre.app/jane",
             type: RedirectType.User,
           },
         ],
@@ -410,8 +410,8 @@ describe("handleOrgRedirect", () => {
       const result = await handleOrgRedirect(params);
 
       // Should use the first redirect's origin
-      expectRedirectTo(result, "https://org1.cal.com/john+jane?orgRedirection=true");
-      expectRedirectUsesData(result, "john+jane", "https://org1.cal.com");
+      expectRedirectTo(result, "https://org1.cal.dre.app/john+jane?orgRedirection=true");
+      expectRedirectUsesData(result, "john+jane", "https://org1.cal.dre.app");
     });
   });
 

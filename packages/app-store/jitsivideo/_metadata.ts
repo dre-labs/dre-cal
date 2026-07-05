@@ -9,12 +9,12 @@ export const metadata = {
   variant: "conferencing",
   categories: ["conferencing"],
   logo: "icon.svg",
-  publisher: "Cal.diy",
+  publisher: "DRE Cal",
   url: "https://jitsi.org/",
   slug: "jitsi",
   title: "Jitsi Meet",
   isGlobal: false,
-  email: "help@cal.com",
+  email: "support@dre.app",
   appData: {
     location: {
       linkType: "dynamic",

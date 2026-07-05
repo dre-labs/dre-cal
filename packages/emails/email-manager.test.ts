@@ -34,7 +34,7 @@ vi.mock("./templates/_base-email", () => {
   return {
     default: class MockBaseEmail {
       getMailerOptions() {
-        return { from: "test@cal.com" };
+        return { from: "test@cal.dre.app" };
       }
     },
   };

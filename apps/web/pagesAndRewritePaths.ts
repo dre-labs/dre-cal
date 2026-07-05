@@ -1,10 +1,9 @@
 import { sync as globSync } from "glob";
-
 import { nextJsOrgRewriteConfig } from "./getNextjsOrgRewriteConfig";
 
 // Top-level route names that are explicitly allowed for org rewrite (whitelist)
 export const topLevelRouteNamesWhitelistedForRewrite: string[] = [
-  // We don't allow all dashboard route names to be used as slug because people are probably accustomed to accessing links like acme.cal.com/event-types etc.
+  // We don't allow all dashboard route names to be used as slug because people are probably accustomed to accessing links like acme.cal.dre.app/event-types etc.
   // So, we carefully allow, what is absolutely needed.
   // Allowed to be a team/user slug in organization because onboarding is a common team name
   "onboarding",
@@ -71,8 +70,8 @@ export { nextJsOrgRewriteConfig };
 function getRegExpMatchingAllReservedRoutes(suffix: string): string {
   // Following routes don't exist but they work by doing rewrite. Thus they need to be excluded from matching the orgRewrite patterns
   // Make sure to keep it upto date as more nonExistingRouteRewrites are added.
-  // "app" is reserved for the Cal.diy Companion landing page served by Framer at cal.com/app.
-  // The browser extension redirects users to cal.com/app when clicked on restricted pages (like chrome://newtab).
+  // "app" is reserved for the DRE Cal Companion landing page served by Framer at cal.dre.app/app.
+  // The browser extension redirects users to cal.dre.app/app when clicked on restricted pages (like chrome://newtab).
   // Without this reservation, /app would be treated as a username lookup and show "username available" error.
   const otherNonExistingRoutePrefixes = ["forms", "router", "success", "cancel", "app"];
 

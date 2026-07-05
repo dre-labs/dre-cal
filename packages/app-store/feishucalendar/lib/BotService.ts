@@ -1,5 +1,4 @@
 import logger from "@calcom/lib/logger";
-
 import { FEISHU_HOST } from "../common";
 import { getAppAccessToken } from "./AppAccessToken";
 
@@ -7,18 +6,18 @@ const log = logger.getSubLogger({ prefix: [`[[FeishuTenantCredential]`] });
 
 const msg = {
   en_us: {
-    title: "Welcome to Cal.diy!",
+    title: "Welcome to DRE Cal!",
     content: [
       [
         {
           tag: "text",
-          text: "Cal.diy is an open source scheduling infrastructure.",
+          text: "DRE Cal is an open source scheduling infrastructure.",
         },
       ],
       [
         {
           tag: "text",
-          text: 'It allows users to send a unique "cal.com" URL that allows anyone to create bookings on their calendars',
+          text: 'It allows users to send a unique "DRE Cal" URL that allows anyone to create bookings on their calendars',
         },
       ],
       [
@@ -36,7 +35,7 @@ const msg = {
       [
         {
           tag: "text",
-          text: "1. Visit https://cal.com and sign up for an account.",
+          text: "1. Visit https://cal.dre.app and sign up for an account.",
         },
       ],
       [

@@ -3,7 +3,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { isSafeUrlToLoadResourceFrom } from "./getSafeRedirectUrl";
 
 vi.mock("./constants", () => ({
-  WEBAPP_URL: "https://app.cal.com",
+  WEBAPP_URL: "https://cal.dre.app",
   EMBED_LIB_URL: "https://embed.com",
 }));
 
@@ -17,9 +17,9 @@ describe("isSafeUrlToLoadResourceFrom", () => {
   });
 
   it("should return true for URLs with same TLD+1 as WEBAPP_URL", () => {
-    expect(isSafeUrlToLoadResourceFrom("https://acme.cal.com/path")).toBe(true);
-    expect(isSafeUrlToLoadResourceFrom("http://dunder.cal.com?query=1")).toBe(true);
-    expect(isSafeUrlToLoadResourceFrom("https://cal.com/path")).toBe(true);
+    expect(isSafeUrlToLoadResourceFrom("https://acme.cal.dre.app/path")).toBe(true);
+    expect(isSafeUrlToLoadResourceFrom("http://dunder.cal.dre.app?query=1")).toBe(true);
+    expect(isSafeUrlToLoadResourceFrom("https://cal.dre.app/path")).toBe(true);
   });
 
   it("should return true for URLs with same TLD+1 as EMBED_LIB_URL", () => {

@@ -7,6 +7,7 @@ import type { SelectedCalendar } from "@calcom/prisma/client";
 import type { CredentialForCalendarServiceWithEmail } from "@calcom/types/Credential";
 
 import { GoogleCalendarSubscriptionAdapter } from "../GoogleCalendarSubscription.adapter";
+import process from "node:process";
 
 const addMonthsFromNow = (months: number) => {
   const date = dayjs();
@@ -284,7 +285,7 @@ describe("GoogleCalendarSubscriptionAdapter", () => {
 
   describe("fetchEvents", () => {
     const commonEventData = {
-      iCalUID: "event-1@cal.com",
+      iCalUID: "event-1@cal.dre.app",
       summary: "Test Event",
       description: "Test Description",
       location: "Test Location",
@@ -333,7 +334,7 @@ describe("GoogleCalendarSubscriptionAdapter", () => {
         items: [
           {
             id: "event-1",
-            iCalUID: "event-1@cal.com",
+            iCalUID: "event-1@cal.dre.app",
             start: oneWeekFromNow.toDate(),
             end: eventEndTime.toDate(),
             busy: true,

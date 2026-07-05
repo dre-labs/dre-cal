@@ -64,7 +64,7 @@ export const createBookingsFixture = (page: Page, workerInfo: WorkerInfo) => {
           rescheduled,
           paid,
           status,
-          iCalUID: `${uid}@cal.com`,
+          iCalUID: `${uid}@cal.dre.app`,
         },
       });
       const bookingFixture = createBookingFixture(booking, store.page);

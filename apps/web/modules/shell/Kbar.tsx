@@ -1,5 +1,3 @@
-import { useSession } from "next-auth/react";
-
 import { appStoreMetadata } from "@calcom/app-store/appStoreMetaData";
 import dayjs from "@calcom/dayjs";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
@@ -27,6 +25,7 @@ import {
   useRegisterActions,
 } from "kbar";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import type { ReactNode } from "react";
 import { useEffect, useMemo } from "react";
 
@@ -425,7 +424,7 @@ function renderResultItem(item: string | Action, active: boolean, t: (key: strin
 
 function NoResultsFound({ searchQuery }: { searchQuery: string }): JSX.Element {
   const { t } = useLocale();
-  const helpUrl = `https://cal.com/help/welcome?search=${encodeURIComponent(searchQuery)}`;
+  const helpUrl = `https://cal.dre.app/help/welcome?search=${encodeURIComponent(searchQuery)}`;
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {

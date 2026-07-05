@@ -3,8 +3,8 @@ import { isOriginAllowed } from "@/lib/is-origin-allowed/is-origin-allowed";
 describe("isOriginAllowed", () => {
   describe("is allowed", () => {
     it("should return true for exact match without wildcard", () => {
-      const allowedOrigins = ["https://app.cal.com/callback"];
-      const origin = "https://app.cal.com/callback";
+      const allowedOrigins = ["https://cal.dre.app/callback"];
+      const origin = "https://cal.dre.app/callback";
       expect(isOriginAllowed(origin, allowedOrigins)).toBe(true);
     });
 
@@ -28,11 +28,11 @@ describe("isOriginAllowed", () => {
 
     it("should handle multiple allowed URIs where only one matches", () => {
       const allowedOrigins = [
-        "https://app.cal.com/other",
+        "https://cal.dre.app/other",
         "*.notthisone.com",
-        "https://app.cal.com/callback",
+        "https://cal.dre.app/callback",
       ];
-      const origin = "https://app.cal.com/callback";
+      const origin = "https://cal.dre.app/callback";
       expect(isOriginAllowed(origin, allowedOrigins)).toBe(true);
     });
 
@@ -57,7 +57,7 @@ describe("isOriginAllowed", () => {
 
   describe("is not allowed", () => {
     it("should return false if no allowed patterns match", () => {
-      const allowedOrigins = ["https://app.cal.com/callback", "*.multiscreen.d1test.biz", "*/callback"];
+      const allowedOrigins = ["https://cal.dre.app/callback", "*.multiscreen.d1test.biz", "*/callback"];
       const origin = "https://unknown.com";
       expect(isOriginAllowed(origin, allowedOrigins)).toBe(false);
     });
@@ -70,7 +70,7 @@ describe("isOriginAllowed", () => {
 
     it("should handle empty allowedUris array correctly", () => {
       const allowedOrigins: string[] = [];
-      const origin = "https://app.cal.com/callback";
+      const origin = "https://cal.dre.app/callback";
       expect(isOriginAllowed(origin, allowedOrigins)).toBe(false);
     });
   });

@@ -128,7 +128,7 @@ export async function handlePaymentSuccess(params: {
     const paymentExternalId = payment.externalId;
 
     const paymentMetadata = {
-      identifier: "cal.com",
+      identifier: "cal.dre.app",
       bookingId,
       eventTypeId: booking.eventType?.id ?? null,
       bookerEmail: evt.attendees[0].email,

@@ -66,7 +66,7 @@ async function getUserPageProps(context: GetServerSidePropsContext) {
 
     // Get just the origin and searchString from the redirect to ensure that we don't redirect to a URL that exposes the real path to book the user for any other events \
     // This is important for a private booking link
-    // e.g. http://app.cal.com/d/sgdthj8mu4nsLNTYi3fW2p/demo -> should redirect to -> http://acme.cal.com/d/sgdthj8mu4nsLNTYi3fW2p/demo and not to http://acme.cal.com/john/demo(which exposes the real path to book the user for any other events)
+    // e.g. http://cal.dre.app/d/sgdthj8mu4nsLNTYi3fW2p/demo -> should redirect to -> http://acme.cal.dre.app/d/sgdthj8mu4nsLNTYi3fW2p/demo and not to http://acme.cal.dre.app/john/demo(which exposes the real path to book the user for any other events)
     const redirectWithOriginAndSearchString = await getRedirectWithOriginAndSearchString({
       slugs: [username],
       redirectType: RedirectType.User,

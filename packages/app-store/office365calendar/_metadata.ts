@@ -10,11 +10,11 @@ export const metadata = {
   category: "calendar",
   categories: ["calendar"],
   logo: "icon.svg",
-  publisher: "Cal.diy",
+  publisher: "DRE Cal",
   slug: "office365-calendar",
   dirName: "office365calendar",
-  url: "https://cal.com/",
-  email: "help@cal.com",
+  url: "https://cal.dre.app/",
+  email: "support@dre.app",
   isOAuth: true,
 } as AppMeta;
 

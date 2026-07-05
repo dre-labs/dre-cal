@@ -11,10 +11,10 @@ export const metadata = {
   categories: ["calendar"],
   category: "calendar",
   logo: "icon.svg",
-  publisher: "Cal.diy",
+  publisher: "DRE Cal",
   slug: "apple-calendar",
-  url: "https://cal.com/",
-  email: "help@cal.com",
+  url: "https://cal.dre.app/",
+  email: "support@dre.app",
   dirName: "applecalendar",
   isOAuth: false,
 } as AppMeta;

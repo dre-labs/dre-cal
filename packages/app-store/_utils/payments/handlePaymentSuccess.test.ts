@@ -243,7 +243,7 @@ describe("handlePaymentSuccess", () => {
         status: BookingStatus.ACCEPTED,
         paymentId: mockPaymentId,
         metadata: expect.objectContaining({
-          identifier: "cal.com",
+          identifier: "cal.dre.app",
           bookingId: mockBookingId,
           eventTypeId: mockBooking.eventType.id,
           bookerEmail: mockEvt.attendees[0].email,
@@ -289,7 +289,7 @@ describe("handlePaymentSuccess", () => {
       expect.any(Object),
       expect.objectContaining({
         metadata: expect.objectContaining({
-          identifier: "cal.com",
+          identifier: "cal.dre.app",
           bookingId: mockBookingId,
           eventTypeId: mockBooking.eventType.id,
           bookerEmail: mockEvt.attendees[0].email,

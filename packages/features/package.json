@@ -2,8 +2,8 @@
   "name": "@calcom/features",
   "sideEffects": false,
   "private": true,
-  "description": "Cal.diy's main collocation of features",
-  "authors": "Cal.com, Inc.",
+  "description": "DRE Cal's main collocation of features",
+  "authors": "DRE Cal",
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {

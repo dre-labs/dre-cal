@@ -115,7 +115,7 @@ export interface App {
   url: string;
   /** Optional documentation website URL */
   docsUrl?: string;
-  /** Whether the app is verified by Cal.diy or not */
+  /** Whether the app is verified by DRE Cal or not */
   verified?: boolean;
   /** Whether the app should appear in the trending section of the app store */
   trending?: boolean;

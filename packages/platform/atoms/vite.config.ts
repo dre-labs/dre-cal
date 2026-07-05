@@ -5,7 +5,7 @@ import dts from "vite-plugin-dts";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), ""); // .env inside of packages/platform/atoms
-  const webAppUrl = env.NEXT_PUBLIC_WEBAPP_URL ?? "https://app.cal.com";
+  const webAppUrl = env.NEXT_PUBLIC_WEBAPP_URL ?? "https://cal.dre.app";
   const calcomVersion = env.NEXT_PUBLIC_CALCOM_VERSION ?? "";
   const vercelCommitSha = env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ?? "";
 

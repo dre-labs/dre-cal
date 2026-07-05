@@ -70,10 +70,10 @@ function PageWrapper(props: AppProps) {
         />
       </Head>
       <DefaultSeo
-        // Set canonical to https://cal.com or self-hosted URL
+        // Set canonical to https://cal.dre.app or self-hosted URL
         canonical={
           IS_CALCOM
-            ? buildCanonical({ path, origin: getCalcomUrl() }) // cal.com & .dev
+            ? buildCanonical({ path, origin: getCalcomUrl() }) // cal.dre.app & .dev
             : buildCanonical({ path, origin: WEBAPP_URL }) // self-hosted
         }
         {...seoConfig.defaultNextSeo}

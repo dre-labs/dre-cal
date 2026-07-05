@@ -37,7 +37,7 @@ export class BookingAuditAccessService {
 
   /**
    * Check if user has permission to view audit logs for a booking.
-   * In cal.diy (no orgs/teams/PBAC), the booking owner always has access.
+   * In DRE Cal (no orgs/teams/PBAC), the booking owner always has access.
    */
   async assertPermissions({
     bookingUid,
@@ -58,7 +58,7 @@ export class BookingAuditAccessService {
       throw new BookingAuditPermissionError(BookingAuditErrorCode.BOOKING_HAS_NO_OWNER);
     }
 
-    // In cal.diy, the booking owner can always view their own audit logs
+    // In DRE Cal, the booking owner can always view their own audit logs
     if (bookingOwnerId === userId) {
       return;
     }

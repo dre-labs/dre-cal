@@ -1,7 +1,7 @@
-import { Locales } from "@/lib/enums/locales";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Expose, Transform } from "class-transformer";
 import { IsEnum, IsObject, IsOptional, IsUrl } from "class-validator";
+import { Locales } from "@/lib/enums/locales";
 
 export class ManagedUserOutput {
   @ApiProperty({ example: 1 })
@@ -55,7 +55,7 @@ export class ManagedUserOutput {
   @IsOptional()
   @ApiPropertyOptional({
     type: String,
-    example: "https://cal.com/api/avatar/2b735186-b01b-46d3-87da-019b8f61776b.png",
+    example: "https://cal.dre.app/api/avatar/2b735186-b01b-46d3-87da-019b8f61776b.png",
     description: `URL of the user's avatar image`,
     nullable: true,
   })

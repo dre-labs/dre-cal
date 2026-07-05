@@ -137,7 +137,7 @@ describe("Cal", () => {
   }
 
   beforeAll(async () => {
-    vi.stubEnv("EMBED_PUBLIC_WEBAPP_URL", "https://app.cal.com");
+    vi.stubEnv("EMBED_PUBLIC_WEBAPP_URL", "https://cal.dre.app");
     // Mock window.Cal
     const mockWindowCal = {
       q: [],
@@ -153,7 +153,7 @@ describe("Cal", () => {
   });
 
   beforeEach(() => {
-    vi.stubEnv("WEBAPP_URL", "https://app.cal.com");
+    vi.stubEnv("WEBAPP_URL", "https://cal.dre.app");
 
     calInstance = new CalClass("test-namespace", []);
     // Reset the document body before each test
@@ -170,7 +170,7 @@ describe("Cal", () => {
         calInstance = new CalClass("test-namespace", []);
         window.Cal.config = { forwardQueryParams: true };
         // Mock the getConfig method
-        calInstance.getConfig = vi.fn().mockReturnValue({ calOrigin: "https://app.cal.com" });
+        calInstance.getConfig = vi.fn().mockReturnValue({ calOrigin: "https://cal.dre.app" });
       });
 
       it("should merge query parameters from URL and explicit params", () => {
@@ -708,7 +708,7 @@ describe("Cal", () => {
     /**
      * These tests verify that __reloadInitiated is sent correctly via doInIframe,
      * which determines whether bookerViewed or bookerReloaded fires in the iframe.
-     * 
+     *
      * - If __reloadInitiated is sent → iframe sets reloadInitiated=true → bookerReloaded fires
      * - If __reloadInitiated is NOT sent → iframe has reloadInitiated=false → bookerViewed fires
      */
@@ -776,9 +776,7 @@ describe("Cal", () => {
       });
 
       // Should call connect, NOT __reloadInitiated
-      expect(calInstance.doInIframe).toHaveBeenCalledWith(
-        expect.objectContaining({ method: "connect" })
-      );
+      expect(calInstance.doInIframe).toHaveBeenCalledWith(expect.objectContaining({ method: "connect" }));
       expect(calInstance.doInIframe).not.toHaveBeenCalledWith(
         expect.objectContaining({ method: "__reloadInitiated" })
       );
@@ -787,7 +785,7 @@ describe("Cal", () => {
     it("should clear stale __reloadInitiated from queue when loadInIframe is called again", () => {
       // This tests the queue clearing behavior that prevents stale __reloadInitiated
       // from causing bookerReloaded to fire incorrectly
-      
+
       // 1. Create iframe
       const iframe = calInstance.createIframe({
         calLink: "john-doe/meeting",
@@ -821,7 +819,7 @@ describe("Cal", () => {
       modal: {
         uid: "test-uid",
         element: document.querySelector("cal-modal-box") as HTMLElement,
-        calOrigin: "https://app.cal.com",
+        calOrigin: "https://cal.dre.app",
       },
       stateData: {
         embedConfig: { theme: "light" },
@@ -835,14 +833,14 @@ describe("Cal", () => {
     beforeEach(() => {
       calInstance = new CalClass("test-namespace", []);
       calInstance.iframe = {
-        src: "https://app.cal.com/john-doe/meeting",
+        src: "https://cal.dre.app/john-doe/meeting",
         dataset: {
           calLink: "john-doe/meeting",
         },
       };
       // Initialize config
       calInstance.__config = {
-        calOrigin: "https://app.cal.com",
+        calOrigin: "https://cal.dre.app",
       };
       // Reset document.querySelector mock before each test
       vi.restoreAllMocks();
@@ -942,7 +940,7 @@ describe("Cal", () => {
     });
 
     it("should return connect when query params are different", () => {
-      calInstance.iframe.src = "https://app.cal.com/john-doe/meeting?param2=value2";
+      calInstance.iframe.src = "https://cal.dre.app/john-doe/meeting?param2=value2";
       const result = calInstance.getNextActionForModal({
         ...baseArgs,
         pathWithQueryToLoad: "john-doe/meeting?param1=value1",

@@ -7,7 +7,7 @@
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
-    "url": "https://github.com/calcom/cal.diy",
+    "url": "https://cal.dre.app",
     "directory": "packages/embeds/embed-core"
   },
   "scripts": {
@@ -33,7 +33,7 @@
     "embed-tests": "yarn playwright test --config=playwright/config/playwright.config.ts",
     "embed-tests-quick": "QUICK=true yarn embed-tests",
     "embed-tests-update-snapshots:ci": "yarn embed-tests-quick --update-snapshots",
-    "withEmbedPublishEnv": "NEXT_PUBLIC_EMBED_LIB_URL='https://app.cal.com/embed/embed.js' NEXT_PUBLIC_WEBAPP_URL='https://app.cal.com' yarn",
+    "withEmbedPublishEnv": "NEXT_PUBLIC_EMBED_LIB_URL='https://cal.dre.app/embed/embed.js' NEXT_PUBLIC_WEBAPP_URL='https://cal.dre.app' yarn",
     "prepack": "yarn ../../../ lint --filter='@calcom/embed-core' && yarn withEmbedPublishEnv build",
     "clean": "npx rimraf .turbo node_modules ../../../apps/web/public/embed"
   },

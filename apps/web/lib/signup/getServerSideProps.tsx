@@ -33,7 +33,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     .string()
     .refine((value) => value.startsWith(WEBAPP_URL), {
       params: (value: string) => ({ value }),
-      message: "Redirect URL must start with 'cal.com'",
+      message: "Redirect URL must start with 'cal.dre.app'",
     })
     .optional()
     .safeParse(ctx.query.redirect);

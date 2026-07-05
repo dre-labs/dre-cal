@@ -1,5 +1,6 @@
 "use client";
 
+import process from "node:process";
 import getStripe from "@calcom/app-store/stripepayment/lib/client";
 import { getPremiumPlanPriceValue } from "@calcom/app-store/stripepayment/lib/utils";
 import {
@@ -368,7 +369,7 @@ export default function Signup({
               domain: isENVDev ? undefined : `.${new URL(WEBSITE_URL).hostname}`,
             }}
             domainsConfig={{
-              refer: "refer.cal.com",
+              refer: "refer.cal.dre.app",
             }}
           />
         </>
@@ -469,9 +470,9 @@ export default function Signup({
 
                             // Handle production domains - modify hostname only to preserve query params
                             if (option.value === "eu") {
-                              currentUrl.hostname = currentUrl.hostname.replace("cal.com", "cal.eu");
+                              currentUrl.hostname = currentUrl.hostname.replace("cal.dre.app", "cal.eu");
                             } else {
-                              currentUrl.hostname = currentUrl.hostname.replace("cal.eu", "cal.com");
+                              currentUrl.hostname = currentUrl.hostname.replace("cal.eu", "cal.dre.app");
                             }
                             window.location.href = currentUrl.toString();
                           }
@@ -511,15 +512,8 @@ export default function Signup({
                           setPremium={(value) => setPremiumUsername(value)}
                           addOnLeading={
                             orgSlug
-                              ? truncateDomain(
-                                  `${WEBAPP_URL.replace(
-                                    URL_PROTOCOL_REGEX,
-                                    ""
-                                  )}/`
-                                )
-                              : truncateDomain(
-                                  `${WEBSITE_URL.replace(URL_PROTOCOL_REGEX, "")}/`
-                                )
+                              ? truncateDomain(`${WEBAPP_URL.replace(URL_PROTOCOL_REGEX, "")}/`)
+                              : truncateDomain(`${WEBSITE_URL.replace(URL_PROTOCOL_REGEX, "")}/`)
                           }
                         />
                       ) : null}

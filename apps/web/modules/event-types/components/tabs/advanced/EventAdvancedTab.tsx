@@ -636,7 +636,7 @@ export const EventAdvancedTab = ({
             <LearnMoreLink
               t={t}
               i18nKey="booking_questions_description"
-              href="https://cal.com/help/event-types/booking-questions"
+              href="https://cal.dre.app/help/event-types/booking-questions"
             />
           </p>
         </div>
@@ -669,7 +669,9 @@ export const EventAdvancedTab = ({
       {!isPlatform && (
         <Controller
           name="requiresCancellationReason"
-          defaultValue={eventType.requiresCancellationReason ?? CancellationReasonRequirement.MANDATORY_HOST_ONLY}
+          defaultValue={
+            eventType.requiresCancellationReason ?? CancellationReasonRequirement.MANDATORY_HOST_ONLY
+          }
           render={({ field: { value, onChange } }) => {
             const cancellationReasonOptions = [
               { value: CancellationReasonRequirement.MANDATORY_BOTH, label: t("mandatory_for_both") },
@@ -730,7 +732,7 @@ export const EventAdvancedTab = ({
                   <LearnMoreLink
                     t={t}
                     i18nKey="description_disable_cancelling"
-                    href="https://cal.com/help/event-types/disable-canceling-rescheduling#disable-cancelling"
+                    href="https://cal.dre.app/help/event-types/disable-canceling-rescheduling#disable-cancelling"
                   />
                 }
                 checked={value}
@@ -874,7 +876,7 @@ export const EventAdvancedTab = ({
               <LearnMoreLink
                 t={t}
                 i18nKey="disable_notes_description"
-                href="https://cal.com/help/event-types/hide-notes"
+                href="https://cal.dre.app/help/event-types/hide-notes"
               />
             }
             checked={value}
@@ -997,7 +999,7 @@ export const EventAdvancedTab = ({
                   <LearnMoreLink
                     t={t}
                     i18nKey="multiple_private_links_description"
-                    href="https://cal.com/help/event-types/private-links"
+                    href="https://cal.dre.app/help/event-types/private-links"
                   />
                 }
                 tooltip={isManagedEventType ? t("managed_event_field_parent_control_disabled") : ""}
@@ -1050,7 +1052,7 @@ export const EventAdvancedTab = ({
                 <LearnMoreLink
                   t={t}
                   i18nKey="offer_seats_description"
-                  href="https://cal.com/help/event-types/offer-seats"
+                  href="https://cal.dre.app/help/event-types/offer-seats"
                 />
               }
               checked={value}
@@ -1182,7 +1184,7 @@ export const EventAdvancedTab = ({
               <LearnMoreLink
                 t={t}
                 i18nKey="hide_organizer_email_description"
-                href="https://cal.com/help/event-types/hideorganizersemail#hide-organizers-email"
+                href="https://cal.dre.app/help/event-types/hideorganizersemail#hide-organizers-email"
               />
             }
             descriptionClassName={customClassNames?.hideOrganizerEmail?.description}
@@ -1218,7 +1220,7 @@ export const EventAdvancedTab = ({
                 <LearnMoreLink
                   t={t}
                   i18nKey="description_lock_timezone_toggle_on_booking_page"
-                  href="https://cal.com/help/event-types/timezone-lock"
+                  href="https://cal.dre.app/help/event-types/timezone-lock"
                 />
               }
               checked={value}
@@ -1271,7 +1273,7 @@ export const EventAdvancedTab = ({
               <LearnMoreLink
                 t={t}
                 i18nKey="allow_rescheduling_past_events_description"
-                href="https://cal.com/help/event-types/allow-rescheduling"
+                href="https://cal.dre.app/help/event-types/allow-rescheduling"
               />
             }
             checked={value}
@@ -1441,7 +1443,7 @@ export const EventAdvancedTab = ({
                 <LearnMoreLink
                   t={t}
                   i18nKey="show_optimized_slots_description"
-                  href="https://cal.com/help/event-types/optimized-slots#optimized-slots"
+                  href="https://cal.dre.app/help/event-types/optimized-slots#optimized-slots"
                 />
               }
               checked={isChecked}

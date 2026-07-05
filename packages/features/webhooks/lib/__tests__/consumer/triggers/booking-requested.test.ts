@@ -51,7 +51,7 @@ describe("BOOKING_REQUESTED Trigger", () => {
         language: { locale: "en" },
       },
     ],
-    location: "https://cal.com/video/test",
+    location: "https://cal.dre.app/video/test",
     ...overrides,
   });
 
@@ -378,7 +378,7 @@ describe("BOOKING_REQUESTED Trigger", () => {
       vi.mocked(mockBookingDataFetcher.fetchEventData).mockResolvedValueOnce({
         calendarEvent: createMockCalendarEvent({
           title: "My Booking",
-          location: "https://cal.com/video/abc",
+          location: "https://cal.dre.app/video/abc",
           organizer: {
             id: 1,
             email: "host@example.com",
@@ -416,7 +416,7 @@ describe("BOOKING_REQUESTED Trigger", () => {
       const p = getDeliveredPayload();
       expect(p.bookingId).toBe(999);
       expect(p.title).toBe("My Booking");
-      expect(p.location).toBe("https://cal.com/video/abc");
+      expect(p.location).toBe("https://cal.dre.app/video/abc");
       expect(p.organizer).toEqual(
         expect.objectContaining({
           email: "host@example.com",

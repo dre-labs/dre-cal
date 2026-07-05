@@ -667,7 +667,7 @@ describe("getBookingResponsesSchema", () => {
 
     describe("excluded email/domain validation", () => {
       test("should fail if the email is present in excluded emails", async () => {
-        const excludedEmails = "spammer@cal.com, hotmail.com, yahoo.com, gmail.com";
+        const excludedEmails = "spammer@cal.dre.app, hotmail.com, yahoo.com, gmail.com";
 
         const schema = getBookingResponsesSchema({
           bookingFields: [
@@ -700,7 +700,7 @@ describe("getBookingResponsesSchema", () => {
       });
 
       test("should pass if the email is not present in excluded emails", async () => {
-        const excludedEmails = "spammer@cal.com, hotmail.com, yahoo.com, gmail.com";
+        const excludedEmails = "spammer@cal.dre.app, hotmail.com, yahoo.com, gmail.com";
 
         const schema = getBookingResponsesSchema({
           bookingFields: [
@@ -833,7 +833,7 @@ describe("getBookingResponsesSchema", () => {
       });
 
       test("should block full email match when exact email is excluded", async () => {
-        const excludedEmails = "anik@cal.com";
+        const excludedEmails = "anik@cal.dre.app";
 
         const schema = getBookingResponsesSchema({
           bookingFields: [
@@ -852,10 +852,10 @@ describe("getBookingResponsesSchema", () => {
           view: "ALL_VIEWS",
         });
 
-        // anik@cal.com should be blocked
+        // anik@cal.dre.app should be blocked
         const parsedResponses = await schema.safeParseAsync({
           name: "test",
-          email: "anik@cal.com",
+          email: "anik@cal.dre.app",
         });
 
         expectParsingToFail(

@@ -2,8 +2,8 @@
  * These integration tests aim to cover difficult-to-test edge cases
  * Standard cases are currently handled in e2e tests only
  *
- * see: https://github.com/calcom/cal.diy/pull/10480
- *      https://github.com/calcom/cal.diy/pull/10968
+ * see: https://cal.dre.app/pull/10480
+ *      https://cal.dre.app/pull/10968
  */
 import prismock from "@calcom/testing/lib/__mocks__/prisma";
 
@@ -31,6 +31,7 @@ import { BookingStatus } from "@calcom/prisma/enums";
 import { test } from "@calcom/testing/lib/fixtures/fixtures";
 
 import { getNewBookingHandler } from "./getNewBookingHandler";
+import process from "node:process";
 
 // Local test runs sometime gets too slow
 const timeout = process.env.CI ? 5000 : 20000;
