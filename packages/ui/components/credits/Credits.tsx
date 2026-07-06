@@ -1,17 +1,39 @@
 "use client";
 
+import process from "node:process";
+import { APP_NAME, CALCOM_VERSION, IS_CALCOM, IS_SELF_HOSTED } from "@calcom/lib/constants";
 import Link from "next/link";
+import type { ReactElement, ReactNode } from "react";
 import { useEffect, useState } from "react";
 
-import { CALCOM_VERSION, COMPANY_NAME, IS_CALCOM, IS_SELF_HOSTED } from "@calcom/lib/constants";
-import process from "node:process";
-
 // eslint-disable-next-line turbo/no-undeclared-env-vars
-const vercelCommitHash = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA;
-const commitHash = vercelCommitHash ? `-${vercelCommitHash.slice(0, 7)}` : "";
-const CalComVersion = `v.${CALCOM_VERSION}-${!IS_SELF_HOSTED ? "h" : "sh"}`;
+const vercelCommitHash: string | undefined = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA;
+let commitHash = "";
+if (vercelCommitHash) {
+  commitHash = `-${vercelCommitHash.slice(0, 7)}`;
+}
 
-export default function Credits() {
+let hostedVersionSuffix = "sh";
+if (!IS_SELF_HOSTED) {
+  hostedVersionSuffix = "h";
+}
+
+const CalComVersion: string = `v.${CALCOM_VERSION}-${hostedVersionSuffix}`;
+
+function CommitHash(): ReactNode {
+  if (!vercelCommitHash || !IS_CALCOM) return commitHash;
+
+  return (
+    <Link
+      href={`https://cal.dre.app/releases/${vercelCommitHash}`}
+      target="_blank"
+      className="hover:underline">
+      {commitHash}
+    </Link>
+  );
+}
+
+export default function Credits(): ReactElement {
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
@@ -19,26 +41,17 @@ export default function Credits() {
   }, []);
 
   return (
-    <small className="text-default mx-3 mb-2 mt-1 hidden text-[0.5rem] opacity-50 lg:block">
+    <small className="mx-3 mt-1 mb-2 hidden text-[0.5rem] text-default opacity-50 lg:block">
       &copy; {new Date().getFullYear()}{" "}
       <Link href="https://cal.dre.app/credits" target="_blank" className="hover:underline">
-        {COMPANY_NAME}
+        {APP_NAME}
       </Link>{" "}
       {hasMounted && (
         <>
           <Link href="https://cal.dre.app/releases" target="_blank" className="hover:underline">
             {CalComVersion}
           </Link>
-          {vercelCommitHash && IS_CALCOM ? (
-            <Link
-              href={`https://cal.dre.app/releases/${vercelCommitHash}`}
-              target="_blank"
-              className="hover:underline">
-              {commitHash}
-            </Link>
-          ) : (
-            commitHash
-          )}
+          <CommitHash />
         </>
       )}
     </small>

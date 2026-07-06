@@ -1,13 +1,13 @@
 /* eslint-disable playwright/missing-playwright-await */
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
-
 import Credits from "./Credits";
 
 vi.mock("@calcom/lib/constants", async () => {
   const actual = (await vi.importActual("@calcom/lib/constants")) as typeof import("@calcom/lib/constants");
   return {
     ...actual,
+    APP_NAME: "DRE Cal",
     CALCOM_VERSION: "mockedVersion",
   };
 });
@@ -16,7 +16,7 @@ describe("Tests for Credits component", () => {
   test("Should render credits section with links", () => {
     render(<Credits />);
 
-    const creditsLinkElement = screen.getByRole("link", { name: /Cal\.com, Inc\./i });
+    const creditsLinkElement = screen.getByRole("link", { name: /DRE Cal/i });
     expect(creditsLinkElement).toBeInTheDocument();
     expect(creditsLinkElement).toHaveAttribute("href", "https://cal.dre.app/credits");
 
