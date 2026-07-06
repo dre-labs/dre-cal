@@ -87,6 +87,7 @@ import { getAllCredentialsIncludeServiceAccountKey } from "../getAllCredentialsF
 import { refreshCredentials } from "../getAllCredentialsForUsersOnEvent/refreshCredentials";
 import getBookingDataSchema from "../getBookingDataSchema";
 import type { LuckyUserService } from "../getLuckyUser";
+import { ensureRequiredCalendarSyncSucceeded } from "../calendarSync/ensureRequiredCalendarSync";
 import { checkActiveBookingsLimitForBooker } from "../handleNewBooking/checkActiveBookingsLimitForBooker";
 import { checkIfBookerEmailIsBlocked } from "../handleNewBooking/checkIfBookerEmailIsBlocked";
 import type { Booking } from "../handleNewBooking/createBooking";
@@ -1946,6 +1947,34 @@ async function handler(
         `EventManager.reschedule failure in some of the integrations ${organizerUser.username}`,
         safeStringify({ error, results })
       );
+
+      try {
+        ensureRequiredCalendarSyncSucceeded({ operation: "reschedule", results });
+      } catch (error) {
+        if (booking && originalRescheduledBooking && !isDryRun) {
+          await deps.prismaClient.$transaction([
+            deps.prismaClient.booking.update({
+              where: { id: originalRescheduledBooking.id },
+              data: {
+                status: originalRescheduledBooking.status,
+                rescheduled: originalRescheduledBooking.rescheduled,
+                rescheduledBy: originalRescheduledBooking.rescheduledBy,
+                cancellationReason: originalRescheduledBooking.cancellationReason,
+              },
+            }),
+            deps.prismaClient.booking.update({
+              where: { id: booking.id },
+              data: {
+                status: BookingStatus.CANCELLED,
+                cancellationReason: "Required calendar sync failed during reschedule",
+                cancelledBy: reqBody.rescheduledBy ?? bookerEmail,
+              },
+            }),
+          ]);
+        }
+
+        throw error;
+      }
     } else {
       if (results.length) {
         // Handle Google Meet results

@@ -486,8 +486,8 @@ describe("handleNewBooking", () => {
       );
 
       test(
-        `an error in updating a calendar event should not stop the rescheduling - Current behaviour is wrong as the booking is resheduled but no-one is notified of it`,
-        async ({ emails }) => {
+        `an error in updating a required calendar event should stop the rescheduling`,
+        async () => {
           const handleNewBooking = getNewBookingHandler();
           const booker = getBooker({
             email: "booker@example.com",
@@ -585,75 +585,33 @@ describe("handleNewBooking", () => {
             },
           });
 
-          const createdBooking = await handleNewBooking({
-            bookingData: mockBookingData,
-          });
+          await expect(
+            handleNewBooking({
+              bookingData: mockBookingData,
+            })
+          ).rejects.toThrow("Unable to reschedule booking because one or more required calendar updates failed.");
 
-          await expectBookingInDBToBeRescheduledFromTo({
-            from: {
+          const originalBooking = await prismaMock.booking.findUnique({
+            where: {
               uid: uidOfBookingToBeRescheduled,
             },
-            to: {
-              description: "",
-              location: "integrations:daily",
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              uid: createdBooking.uid!,
-              eventTypeId: mockBookingData.eventTypeId,
-              status: BookingStatus.ACCEPTED,
-              metadata: {
-                videoCallUrl: `${WEBAPP_URL}/video/${createdBooking?.uid}`,
-              },
-              responses: expect.objectContaining({
-                email: booker.email,
-                name: booker.name,
-              }),
-              // Booking References still use the original booking's references - Not sure how intentional it is.
-              references: [
-                {
-                  type: appStoreMetadata.dailyvideo.type,
-                  uid: "MOCK_ID",
-                  meetingId: "MOCK_ID",
-                  meetingPassword: "MOCK_PASS",
-                  meetingUrl: "http://mock-dailyvideo.example.com",
-                },
-                {
-                  type: appStoreMetadata.googlecalendar.type,
-                  // A reference is still created in case of event creation failure, with nullish values. Not sure what's the purpose for this.
-                  uid: "ORIGINAL_BOOKING_UID",
-                  meetingId: "ORIGINAL_MEETING_ID",
-                  meetingPassword: "ORIGINAL_MEETING_PASSWORD",
-                  meetingUrl: "https://ORIGINAL_MEETING_URL",
-                },
-              ],
+          });
+          expect(originalBooking?.status).toBe(BookingStatus.ACCEPTED);
+          expect(originalBooking?.rescheduled).not.toBe(true);
+
+          const attemptedRescheduledBookings = await prismaMock.booking.findMany({
+            where: {
+              fromReschedule: uidOfBookingToBeRescheduled,
             },
           });
-
-          expectSuccessfulBookingRescheduledEmails({
-            booker,
-            organizer,
-            emails,
-          });
-
-          expectBookingRescheduledWebhookToHaveBeenFired({
-            booker,
-            organizer,
-            location: "integrations:daily",
-            subscriberUrl: "http://my-webhook.example.com",
-            payload: {
-              uid: createdBooking.uid,
-              appsStatus: [
-                expect.objectContaining(getMockPassingAppStatus({ slug: appStoreMetadata.dailyvideo.slug })),
-                expect.objectContaining(
-                  getMockFailingAppStatus({ slug: appStoreMetadata.googlecalendar.slug })
-                ),
-              ],
-            },
-            videoCallUrl: `${WEBAPP_URL}/video/${createdBooking?.uid}`,
-          });
+          expect(attemptedRescheduledBookings).toHaveLength(1);
+          expect(attemptedRescheduledBookings[0].status).toBe(BookingStatus.CANCELLED);
+          expect(attemptedRescheduledBookings[0].cancellationReason).toBe(
+            "Required calendar sync failed during reschedule"
+          );
         },
         timeout
       );
-
       describe("Event Type that requires confirmation", () => {
         test(
           `should reschedule a booking that requires confirmation in PENDING state - When a booker(who is not the organizer himself) is doing the reschedule

@@ -5,6 +5,7 @@ import { eventTypeMetaDataSchemaWithTypedApps } from "@calcom/app-store/zod-util
 import dayjs from "@calcom/dayjs";
 import { sendCancelledEmailsAndSMS } from "@calcom/emails/email-manager";
 import { BookingReferenceRepository } from "@calcom/features/bookingReference/repositories/BookingReferenceRepository";
+import { ensureRequiredCalendarSyncSucceeded } from "@calcom/features/bookings/lib/calendarSync/ensureRequiredCalendarSync";
 import EventManager from "@calcom/features/bookings/lib/EventManager";
 import { getCalEventResponses } from "@calcom/features/bookings/lib/getCalEventResponses";
 import { processNoShowFeeOnCancellation } from "@calcom/features/bookings/lib/payment/processNoShowFeeOnCancellation";
@@ -23,6 +24,7 @@ import {
 import sendPayload from "@calcom/features/webhooks/lib/sendOrSchedulePayload";
 import type { EventTypeInfo } from "@calcom/features/webhooks/lib/sendPayload";
 import { getTranslation } from "@calcom/i18n/server";
+import { ErrorWithCode } from "@calcom/lib/errors";
 import { HttpError } from "@calcom/lib/http-error";
 import { isPrismaObjOrUndefined } from "@calcom/lib/isPrismaObj";
 import { parseRecurringEvent } from "@calcom/lib/isRecurringEvent";
@@ -131,6 +133,13 @@ async function handler(input: CancelBookingInput, dependencies?: Dependencies) {
       message: "This event type does not allow cancellations",
     });
   }
+
+  const originalBookingState = {
+    status: bookingToDelete.status,
+    cancellationReason: null,
+    cancelledBy: null,
+    iCalSequence: bookingToDelete.iCalSequence,
+  };
 
   const isCancellationUserHost =
     bookingToDelete.userId === userId || bookingToDelete.user.email === cancelledBy;
@@ -456,9 +465,33 @@ async function handler(input: CancelBookingInput, dependencies?: Dependencies) {
         bookingToDeleteEventTypeMetadata?.apps
       );
 
-      await eventManager.cancelEvent(evt, bookingToDelete.references, isBookingInRecurringSeries);
+      const deleteResults = await eventManager.cancelEvent(
+        evt,
+        bookingToDelete.references,
+        isBookingInRecurringSeries
+      );
+      try {
+        ensureRequiredCalendarSyncSucceeded({ operation: "cancel", results: deleteResults });
+      } catch (error) {
+        await bookingRepository.updateIncludeReferences({
+          where: {
+            uid: bookingToDelete.uid,
+          },
+          data: {
+            status: originalBookingState.status,
+            cancellationReason: originalBookingState.cancellationReason ?? null,
+            cancelledBy: originalBookingState.cancelledBy ?? null,
+            iCalSequence: originalBookingState.iCalSequence,
+          },
+        });
+
+        throw error;
+      }
     } catch (error) {
       log.error(`Error deleting integrations`, safeStringify({ error }));
+      if (error instanceof ErrorWithCode) {
+        throw error;
+      }
     }
   }
 

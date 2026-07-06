@@ -1,25 +1,23 @@
+import prismaMock from "@calcom/testing/lib/__mocks__/prisma";
 import {
   BookingLocations,
   createBookingScenario,
   getBooker,
+  getDate,
   getGoogleCalendarCredential,
   getOrganizer,
   getScenarioData,
+  mockCalendarToCrashOnDeleteEvent,
   mockCalendarToHaveNoBusySlots,
   mockSuccessfulVideoMeetingCreation,
   TestData,
-  getDate,
 } from "@calcom/testing/lib/bookingScenario/bookingScenario";
-import {
-  expectBookingCancelledWebhookToHaveBeenFired,
-} from "@calcom/testing/lib/bookingScenario/expects";
-import { setupAndTeardown } from "@calcom/testing/lib/bookingScenario/setupAndTeardown";
-
-import { describe, expect, vi } from "vitest";
-
 import { processPaymentRefund } from "@calcom/features/bookings/lib/payment/processPaymentRefund";
 import { BookingStatus } from "@calcom/prisma/enums";
+import { expectBookingCancelledWebhookToHaveBeenFired } from "@calcom/testing/lib/bookingScenario/expects";
+import { setupAndTeardown } from "@calcom/testing/lib/bookingScenario/setupAndTeardown";
 import { test } from "@calcom/testing/lib/fixtures/fixtures";
+import { describe, expect, vi } from "vitest";
 
 vi.mock("@calcom/features/bookings/lib/payment/processPaymentRefund", () => ({
   processPaymentRefund: vi.fn(),
@@ -143,6 +141,103 @@ describe("Cancel Booking", () => {
       },
     });
 
+  });
+
+  test("Should not cancel booking when required calendar event deletion fails", async () => {
+    const handleCancelBooking = (await import("@calcom/features/bookings/lib/handleCancelBooking")).default;
+
+    const booker = getBooker({
+      email: "booker@example.com",
+      name: "Booker",
+    });
+
+    const organizer = getOrganizer({
+      name: "Organizer",
+      email: "organizer@example.com",
+      id: 101,
+      schedules: [TestData.schedules.IstWorkHours],
+      credentials: [getGoogleCalendarCredential()],
+      selectedCalendars: [TestData.selectedCalendars.google],
+    });
+
+    const uidOfBookingToBeCancelled = "h5Wv3eHgconAED2j4gcVhQ";
+    const idOfBookingToBeCancelled = 1021;
+    const { dateString: plus1DateString } = getDate({ dateIncrement: 1 });
+
+    await createBookingScenario(
+      getScenarioData({
+        eventTypes: [
+          {
+            id: 1,
+            slotInterval: 30,
+            length: 30,
+            users: [
+              {
+                id: 101,
+              },
+            ],
+          },
+        ],
+        bookings: [
+          {
+            id: idOfBookingToBeCancelled,
+            uid: uidOfBookingToBeCancelled,
+            attendees: [
+              {
+                email: booker.email,
+                timeZone: "Asia/Kolkata",
+              },
+            ],
+            eventTypeId: 1,
+            userId: 101,
+            responses: {
+              email: booker.email,
+              name: booker.name,
+              location: { optionValue: "", value: BookingLocations.CalVideo },
+            },
+            status: BookingStatus.ACCEPTED,
+            startTime: `${plus1DateString}T05:00:00.000Z`,
+            endTime: `${plus1DateString}T05:15:00.000Z`,
+            references: [
+              {
+                type: "google_calendar",
+                uid: "ORIGINAL_BOOKING_UID",
+                externalCalendarId: "existing-event-type@example.com",
+                credentialId: undefined,
+              },
+            ],
+          },
+        ],
+        organizer,
+        apps: [TestData.apps["google-calendar"]],
+      })
+    );
+
+    mockCalendarToCrashOnDeleteEvent("googlecalendar");
+
+    await expect(
+      handleCancelBooking({
+        bookingData: {
+          id: idOfBookingToBeCancelled,
+          uid: uidOfBookingToBeCancelled,
+          cancelledBy: organizer.email,
+          cancellationReason: "No reason",
+        },
+      })
+    ).rejects.toThrow("Unable to cancel booking because one or more required calendar updates failed.");
+
+    const booking = await prismaMock.booking.findUnique({
+      where: {
+        uid: uidOfBookingToBeCancelled,
+      },
+      include: {
+        references: true,
+      },
+    });
+
+    expect(booking?.status).toBe(BookingStatus.ACCEPTED);
+    expect(booking?.cancellationReason).toBeNull();
+    expect(booking?.references[0].deleted).toBeNull();
   });
 
   test("Should call processPaymentRefund", async () => {
@@ -1310,7 +1405,7 @@ describe("Cancel Booking", () => {
                 meetingId: "gcal456",
                 meetingUrl: null,
                 meetingPassword: null,
-                credentialId: 2,
+                credentialId: 1,
                 deleted: null,
               },
             ],

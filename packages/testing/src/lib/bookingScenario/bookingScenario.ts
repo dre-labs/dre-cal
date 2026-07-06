@@ -1691,6 +1691,7 @@ export async function mockCalendar(
     busySlots?: { start: `${string}Z`; end: `${string}Z` }[];
     creationCrash?: boolean;
     updationCrash?: boolean;
+    deletionCrash?: boolean;
     getAvailabilityCrash?: boolean;
   }
 ): Promise<CalendarServiceMethodMock> {
@@ -1823,6 +1824,9 @@ export async function mockCalendar(
         });
       },
       deleteEvent: async (...rest: Parameters<Calendar["deleteEvent"]>) => {
+        if (calendarData?.deletionCrash) {
+          throw new Error("MockCalendarService.deleteEvent fake error");
+        }
         log.silly("mockCalendar.deleteEvent", JSON.stringify({ rest }));
         deleteEventCalls.push({
           args: {
@@ -1898,6 +1902,10 @@ export async function mockCalendarToCrashOnCreateEvent(metadataLookupKey: keyof 
 
 export async function mockCalendarToCrashOnUpdateEvent(metadataLookupKey: keyof typeof appStoreMetadata) {
   return await mockCalendar(metadataLookupKey, { updationCrash: true });
+}
+
+export async function mockCalendarToCrashOnDeleteEvent(metadataLookupKey: keyof typeof appStoreMetadata) {
+  return await mockCalendar(metadataLookupKey, { deletionCrash: true });
 }
 
 export function mockVideoApp({

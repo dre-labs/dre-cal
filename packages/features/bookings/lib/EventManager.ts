@@ -500,7 +500,7 @@ export default class EventManager {
     reference: PartialReference;
     event: CalendarEvent;
     isBookingInRecurringSeries?: boolean;
-  }) {
+  }): Promise<EventResult<unknown>> {
     log.debug(
       "deleteCalendarEventForBookingReference",
       safeStringify({ bookingCalendarReference: reference, event: getPiiFreeCalendarEvent(event) })
@@ -524,13 +524,52 @@ export default class EventManager {
       reference.delegationCredentialId
     );
 
-    if (calendarCredential) {
+    if (!calendarCredential) {
+      return {
+        type: reference.type,
+        appName: reference.type,
+        success: false,
+        uid: bookingRefUid,
+        originalEvent: event,
+        calError: "Calendar credential not found",
+        credentialId: credentialId ?? undefined,
+        externalId: bookingExternalCalendarId,
+      };
+    }
+
+    try {
       await deleteEvent({
         credential: calendarCredential,
         bookingRefUid,
         event,
         externalCalendarId: bookingExternalCalendarId,
       });
+      return {
+        type: reference.type,
+        appName: calendarCredential.appName || calendarCredential.appId || "",
+        success: true,
+        uid: bookingRefUid,
+        originalEvent: event,
+        credentialId: calendarCredential.id,
+        externalId: bookingExternalCalendarId,
+      };
+    } catch (error) {
+      const calError = error instanceof Error ? error.message : JSON.stringify(error);
+      log.warn(
+        "Error deleting calendar event for booking",
+        safeStringify({ error: calError, bookingCalendarReference: reference })
+      );
+
+      return {
+        type: reference.type,
+        appName: calendarCredential.appName || calendarCredential.appId || "",
+        success: false,
+        uid: bookingRefUid,
+        originalEvent: event,
+        calError,
+        credentialId: calendarCredential.id,
+        externalId: bookingExternalCalendarId,
+      };
     }
   }
 
@@ -781,8 +820,8 @@ export default class EventManager {
       "uid" | "type" | "externalCalendarId" | "credentialId" | "thirdPartyRecurringEventId"
     >[],
     isBookingInRecurringSeries?: boolean
-  ) {
-    await this.deleteEventsAndMeetings({
+  ): Promise<Array<EventResult<unknown>>> {
+    return await this.deleteEventsAndMeetings({
       event,
       bookingReferences,
       isBookingInRecurringSeries,
@@ -797,7 +836,7 @@ export default class EventManager {
     event: CalendarEvent;
     bookingReferences: PartialReference[];
     isBookingInRecurringSeries?: boolean;
-  }) {
+  }): Promise<Array<EventResult<unknown>>> {
     const log = logger.getSubLogger({ prefix: [`[deleteEventsAndMeetings]: ${event?.uid}`] });
     const calendarReferences = [],
       videoReferences = [],
@@ -821,13 +860,29 @@ export default class EventManager {
         allPromises.push(
           this.deleteVideoEventForBookingReference({
             reference,
-          })
+          }).then(() => ({
+            type: reference.type,
+            appName: reference.type,
+            success: true,
+            uid: reference.uid,
+            originalEvent: event,
+            credentialId: reference.credentialId ?? undefined,
+          }))
         );
       }
 
       if (reference.type.includes("_crm") || reference.type.includes("other_calendar")) {
         crmReferences.push(reference);
-        allPromises.push(this.deleteCRMEvent({ reference, event }));
+        allPromises.push(
+          this.deleteCRMEvent({ reference, event }).then(() => ({
+            type: reference.type,
+            appName: reference.type,
+            success: true,
+            uid: reference.uid,
+            originalEvent: event,
+            credentialId: reference.credentialId ?? undefined,
+          }))
+        );
       }
     }
 
@@ -835,7 +890,8 @@ export default class EventManager {
 
     // Using allSettled to ensure that if one of the promises rejects, the others will still be executed.
     // Because we are just cleaning up the events and meetings, we don't want to throw an error if one of them fails.
-    (await Promise.allSettled(allPromises)).some((result) => {
+    const settledResults = await Promise.allSettled(allPromises);
+    settledResults.some((result) => {
       if (result.status === "rejected") {
         // Make it a soft error because in case a PENDING booking is rescheduled there would be no calendar events or video meetings.
         log.warn(
@@ -848,6 +904,19 @@ export default class EventManager {
     if (!allPromises.length) {
       log.warn("No calendar or video references found for booking - Couldn't delete events or meetings");
     }
+
+    return settledResults.map((result) => {
+      if (result.status === "fulfilled") return result.value;
+
+      return {
+        type: "unknown",
+        appName: "unknown",
+        success: false,
+        uid: "",
+        originalEvent: event,
+        calError: result.reason instanceof Error ? result.reason.message : JSON.stringify(result.reason),
+      };
+    });
   }
 
   public async updateCalendarAttendees(event: CalendarEvent, booking: PartialBooking) {
