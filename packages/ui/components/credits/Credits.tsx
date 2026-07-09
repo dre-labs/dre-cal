@@ -20,7 +20,7 @@ if (!IS_SELF_HOSTED) {
 
 const CalComVersion: string = `v.${CALCOM_VERSION}-${hostedVersionSuffix}`;
 
-function CommitHash(): ReactNode {
+function renderCommitHash(): ReactNode {
   if (!vercelCommitHash || !IS_CALCOM) return commitHash;
 
   return (
@@ -51,7 +51,7 @@ export default function Credits(): ReactElement {
           <Link href="https://cal.dre.app/releases" target="_blank" className="hover:underline">
             {CalComVersion}
           </Link>
-          <CommitHash />
+          {renderCommitHash()}
         </>
       )}
     </small>

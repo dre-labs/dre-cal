@@ -1,8 +1,6 @@
-import { render, screen, cleanup } from "@testing-library/react";
-import { describe, expect, it, vi, beforeAll, afterAll, afterEach } from "vitest";
-
 import * as shouldChargeModule from "@calcom/features/bookings/lib/payment/shouldChargeNoShowCancellationFee";
-
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import CancelBooking from "../CancelBooking";
 
 // Mock the embed-iframe module to prevent it from scheduling timers/RAF that can cause
@@ -273,5 +271,102 @@ describe("CancelBooking Cancellation Fee Warning", () => {
     );
 
     expect(screen.queryByText(/I acknowledge that cancelling within/)).not.toBeInTheDocument();
+  });
+
+  it("should require cancellation reason when cancellationReason booking field is required", () => {
+    vi.mocked(shouldChargeModule.shouldChargeNoShowCancellationFee).mockReturnValue(false);
+
+    render(
+      <CancelBooking
+        booking={mockBookingWithoutCancellationFee}
+        profile={{ name: "Test User", slug: "test-user" }}
+        team={null}
+        isHost={false}
+        eventTypeMetadata={mockEventTypeMetadataWithoutFee}
+        bookingFields={[
+          {
+            defaultLabel: "reason_for_cancellation",
+            type: "textarea",
+            editable: "system-but-optional",
+            name: "cancellationReason",
+            defaultPlaceholder: "cancellation_reason_placeholder",
+            required: true,
+            views: [{ id: "cancel", label: "Cancel View" }],
+          },
+        ]}
+        {...mockProps}
+      />
+    );
+
+    const confirmCancelButton = screen.getByTestId("confirm_cancel");
+    expect(confirmCancelButton).toBeDisabled();
+
+    fireEvent.change(screen.getByTestId("cancel_reason"), {
+      target: { value: "Need to cancel" },
+    });
+
+    expect(confirmCancelButton).toBeEnabled();
+  });
+
+  it("should hide cancellation reason when cancellationReason booking field is hidden", () => {
+    vi.mocked(shouldChargeModule.shouldChargeNoShowCancellationFee).mockReturnValue(false);
+
+    render(
+      <CancelBooking
+        booking={mockBookingWithoutCancellationFee}
+        profile={{ name: "Test User", slug: "test-user" }}
+        team={null}
+        isHost={true}
+        eventTypeMetadata={mockEventTypeMetadataWithoutFee}
+        requiresCancellationReason="MANDATORY_BOTH"
+        bookingFields={[
+          {
+            defaultLabel: "reason_for_cancellation",
+            type: "textarea",
+            editable: "system-but-optional",
+            name: "cancellationReason",
+            defaultPlaceholder: "cancellation_reason_placeholder",
+            required: true,
+            hidden: true,
+            views: [{ id: "cancel", label: "Cancel View" }],
+          },
+        ]}
+        {...mockProps}
+      />
+    );
+
+    expect(screen.queryByTestId("cancel_reason")).not.toBeInTheDocument();
+    expect(screen.getByTestId("confirm_cancel")).toBeEnabled();
+  });
+
+  it("should use cancellationReason booking field label and placeholder", () => {
+    vi.mocked(shouldChargeModule.shouldChargeNoShowCancellationFee).mockReturnValue(false);
+
+    render(
+      <CancelBooking
+        booking={mockBookingWithoutCancellationFee}
+        profile={{ name: "Test User", slug: "test-user" }}
+        team={null}
+        isHost={false}
+        eventTypeMetadata={mockEventTypeMetadataWithoutFee}
+        bookingFields={[
+          {
+            label: "Custom cancellation label",
+            placeholder: "Custom cancellation placeholder",
+            defaultLabel: "reason_for_cancellation",
+            type: "textarea",
+            editable: "system-but-optional",
+            name: "cancellationReason",
+            defaultPlaceholder: "cancellation_reason_placeholder",
+            required: false,
+            views: [{ id: "cancel", label: "Cancel View" }],
+          },
+        ]}
+        {...mockProps}
+      />
+    );
+
+    expect(screen.getByText("Custom cancellation label")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Custom cancellation placeholder")).toBeInTheDocument();
   });
 });

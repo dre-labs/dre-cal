@@ -1,6 +1,6 @@
 # Cancellation Reason Requirement Decisions
 
-## ADR-001: Store in Database Column vs Metadata JSON
+## ADR-001: Store in bookingFields vs EventType column
 
 ### Context
 
@@ -8,21 +8,20 @@ Need to store the cancellation reason requirement setting on EventType.
 
 ### Options Considered
 
-1. **New database column with enum** — Requires migration, type-safe, cleaner queries
-2. **Metadata JSON field** — No migration, but less type-safe for a core setting
+1. **New database column with enum** - Already implemented locally, but creates a separate configuration surface
+2. **BookingFields system field** - Matches M2 and the existing `rescheduleReason` pattern
 
 ### Decision
 
-Use a dedicated database column with a Prisma enum (`CancellationReasonRequirement`).
+Use `EventType.bookingFields` with a `cancellationReason` system field for runtime behavior.
 
 Rationale:
-- This is a core booking flow setting, similar to `disableCancelling` and `requiresConfirmation`
-- Type-safe at the database level
-- Cleaner to query in cancellation validation logic
-- Consistent with how similar settings (`disableCancelling`, `disableRescheduling`) are stored
+
+- Consistent with `rescheduleReason`
+- Lets Booking Questions own label, placeholder, required, and hidden configuration
+- Avoids new schema work for M2
 
 ### Consequences
 
-- Requires database migration
-- Type-safe enum values
-- Direct column access in queries (no JSON parsing)
+- Existing enum/column is a legacy fallback until schema cleanup is approved
+- UI/backend must parse the cancellation reason field from `bookingFields`

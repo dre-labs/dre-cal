@@ -13,6 +13,7 @@ import { markdownToSafeHTMLClient } from "@calcom/lib/markdownToSafeHTMLClient";
 import turndown from "@calcom/lib/turndownService";
 import { excludeOrRequireEmailSchema } from "@calcom/prisma/zod-utils";
 import classNames from "@calcom/ui/classNames";
+import { Alert } from "@calcom/ui/components/alert";
 import { Badge } from "@calcom/ui/components/badge";
 import { Button } from "@calcom/ui/components/button";
 import { DialogClose, DialogContent, DialogFooter, DialogHeader } from "@calcom/ui/components/dialog";
@@ -83,6 +84,12 @@ function hasWhitespaceOnlyLabel(data: RhfFormField): boolean {
     }
   }
   return false;
+}
+
+function getViewSpecificFieldAlertKey(fieldName: string | undefined): string | null {
+  if (fieldName === "rescheduleReason") return "reschedule_reason_booking_question_alert";
+  if (fieldName === "cancellationReason") return "cancellation_reason_booking_question_alert";
+  return null;
 }
 
 /**
@@ -613,6 +620,7 @@ function FieldEditDialog({
     //resolver: zodResolver(fieldSchema),
   });
   const formFieldType = fieldForm.getValues("type");
+  const viewSpecificFieldAlertKey = getViewSpecificFieldAlertKey(fieldForm.getValues("name"));
 
   useEffect(() => {
     if (!formFieldType) {
@@ -669,6 +677,9 @@ function FieldEditDialog({
               options={fieldTypes.filter((f) => !f.systemOnly)}
               label={t("input_type")}
             />
+            {viewSpecificFieldAlertKey ? (
+              <Alert severity="info" message={t(viewSpecificFieldAlertKey)} className="mt-6" />
+            ) : null}
             {(() => {
               if (!variantsConfig) {
                 return (
@@ -688,28 +699,34 @@ function FieldEditDialog({
                       }
                       label={t("identifier")}
                     />
-                    <CheckboxField
-                      description={t("disable_input_if_prefilled")}
-                      {...fieldForm.register("disableOnPrefill", { setValueAs: Boolean })}
-                    />
-                    <div>
-                      {formFieldType === "boolean" && !isPlatform ? (
-                        <CheckboxFieldLabel fieldForm={fieldForm} />
-                      ) : (
-                        <InputField
-                          {...fieldForm.register("label")}
-                          // System fields have a defaultLabel, so there a label is not required
-                          required={
-                            !["system", "system-but-optional"].includes(fieldForm.getValues("editable") || "")
-                          }
-                          placeholder={t(fieldForm.getValues("defaultLabel") || "")}
-                          containerClassName="mt-6"
-                          label={t("label")}
-                        />
-                      )}
-                    </div>
+                    {!viewSpecificFieldAlertKey ? (
+                      <CheckboxField
+                        description={t("disable_input_if_prefilled")}
+                        {...fieldForm.register("disableOnPrefill", { setValueAs: Boolean })}
+                      />
+                    ) : null}
+                    {!viewSpecificFieldAlertKey ? (
+                      <div>
+                        {formFieldType === "boolean" && !isPlatform ? (
+                          <CheckboxFieldLabel fieldForm={fieldForm} />
+                        ) : (
+                          <InputField
+                            {...fieldForm.register("label")}
+                            // System fields have a defaultLabel, so there a label is not required
+                            required={
+                              !["system", "system-but-optional"].includes(
+                                fieldForm.getValues("editable") || ""
+                              )
+                            }
+                            placeholder={t(fieldForm.getValues("defaultLabel") || "")}
+                            containerClassName="mt-6"
+                            label={t("label")}
+                          />
+                        )}
+                      </div>
+                    ) : null}
 
-                    {fieldType?.isTextType ? (
+                    {fieldType?.isTextType && !viewSpecificFieldAlertKey ? (
                       <InputField
                         {...fieldForm.register("placeholder")}
                         containerClassName="mt-6"
@@ -734,7 +751,7 @@ function FieldEditDialog({
                       />
                     ) : null}
 
-                    {fieldType?.supportsLengthCheck ? (
+                    {fieldType?.supportsLengthCheck && !viewSpecificFieldAlertKey ? (
                       <FieldWithLengthCheckSupport containerClassName="mt-6" fieldForm={fieldForm} />
                     ) : null}
 

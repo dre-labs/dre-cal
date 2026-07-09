@@ -1,7 +1,10 @@
 "use client";
 
 import { sdkActionManager } from "@calcom/embed-core/embed-iframe";
-import { isCancellationReasonRequired } from "@calcom/features/bookings/lib/cancellationReason";
+import {
+  getCancellationReasonField,
+  isCancellationReasonRequired,
+} from "@calcom/features/bookings/lib/cancellationReason";
 import { shouldChargeNoShowCancellationFee } from "@calcom/features/bookings/lib/payment/shouldChargeNoShowCancellationFee";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { useRefreshData } from "@calcom/lib/hooks/useRefreshData";
@@ -111,6 +114,7 @@ type Props = {
   renderContext: "booking-single-view" | "dialog";
   eventTypeMetadata?: Record<string, unknown> | null;
   requiresCancellationReason?: CancellationReasonRequirement | null;
+  bookingFields?: unknown;
   showErrorAsToast?: boolean;
   onCanceled?: () => void;
 };
@@ -164,10 +168,23 @@ export default function CancelBooking(props: Props) {
   const isCancellationUserHost =
     props.isHost || bookingCancelledEventProps.organizer.email === currentUserEmail;
 
+  const cancellationReasonField = getCancellationReasonField(props.bookingFields);
   const isReasonRequired = isCancellationReasonRequired(
     props.requiresCancellationReason,
-    isCancellationUserHost
+    isCancellationUserHost,
+    props.bookingFields
   );
+  const isCancellationReasonHidden = !!cancellationReasonField?.hidden;
+  const cancellationReasonLabel = cancellationReasonField?.label?.trim()
+    ? cancellationReasonField.label
+    : t(
+        isReasonRequired
+          ? cancellationReasonField?.defaultLabel || "cancellation_reason"
+          : "cancellation_reason_optional_label"
+      );
+  const cancellationReasonPlaceholder = cancellationReasonField?.placeholder?.trim()
+    ? cancellationReasonField.placeholder
+    : t(cancellationReasonField?.defaultPlaceholder || "cancellation_reason_placeholder");
 
   const missingRequiredReason = isReasonRequired && !cancellationReason?.trim();
   const hostMissingInternalNote =
@@ -226,18 +243,22 @@ export default function CancelBooking(props: Props) {
             </>
           )}
 
-          <Label>{t(isReasonRequired ? "cancellation_reason" : "cancellation_reason_optional_label")}</Label>
+          {!isCancellationReasonHidden ? (
+            <>
+              <Label>{cancellationReasonLabel}</Label>
 
-          <TextArea
-            data-testid="cancel_reason"
-            ref={cancelBookingRef}
-            placeholder={t("cancellation_reason_placeholder")}
-            value={cancellationReason}
-            onChange={(e) => setCancellationReason(e.target.value)}
-            className={classNames("mb-4 w-full", !isRenderedAsCancelDialog && "mt-2")}
-            rows={3}
-          />
-          {isCancellationUserHost ? (
+              <TextArea
+                data-testid="cancel_reason"
+                ref={cancelBookingRef}
+                placeholder={cancellationReasonPlaceholder}
+                value={cancellationReason}
+                onChange={(e) => setCancellationReason(e.target.value)}
+                className={classNames("mb-4 w-full", !isRenderedAsCancelDialog && "mt-2")}
+                rows={3}
+              />
+            </>
+          ) : null}
+          {isCancellationUserHost && !isCancellationReasonHidden ? (
             <div className="-mt-2 mb-4 flex items-center gap-2">
               <InfoIcon className="text-subtle h-4 w-4" />
               <p className="text-subtle text-sm leading-none">

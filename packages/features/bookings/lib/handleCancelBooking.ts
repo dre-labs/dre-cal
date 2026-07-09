@@ -146,7 +146,8 @@ async function handler(input: CancelBookingInput, dependencies?: Dependencies) {
 
   const isReasonRequired = isCancellationReasonRequired(
     bookingToDelete.eventType?.requiresCancellationReason,
-    isCancellationUserHost
+    isCancellationUserHost,
+    bookingToDelete.eventType?.bookingFields
   );
 
   if (

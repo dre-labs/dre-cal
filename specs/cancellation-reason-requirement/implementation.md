@@ -1,34 +1,32 @@
 # Cancellation Reason Requirement Implementation
 
-## Status: complete
+## Status: in progress
 
 ## Completed
 
-1. Added CancellationReasonRequirement enum to schema.prisma (line 129)
-2. Added requiresCancellationReason column to EventType model (line 269)
-3. Created database migration (20260115111819_add_cancellation_reason_require)
-4. Added translation keys to English locale (common.json)
-5. Added dropdown setting in EventAdvancedTab (lines 691-719)
-6. Added requiresCancellationReason to getEventTypesFromDB select (apps/web/lib/booking.ts)
-7. Passed requiresCancellationReason prop through:
-   - bookings-single-view.tsx → CancelBooking
-   - CancelBookingDialog.tsx → CancelBooking
-8. Updated CancelBooking component Props and validation logic
-9. Added server-side validation in handleCancelBooking
-10. Added requiresCancellationReason to getBookingToDelete select
-11. Fixed dynamic label to show "(optional)" only when isReasonRequiredForUser() returns false
+- Legacy implementation added `CancellationReasonRequirement` enum and `EventType.requiresCancellationReason`
+- Legacy implementation added Advanced-tab dropdown and frontend/backend validation
+- Server queries already select `eventType.bookingFields`
+- Added focused backend tests for bookingFields-required and bookingFields-hidden cancellation reason behavior
+- Added `CancelBooking` component tests for required, hidden, and custom label/placeholder bookingFields behavior
 
 ## In Progress
 
+- Align runtime behavior with the M2 Booking Questions spec
+- Add `cancellationReason` as a bookingFields system field
+- Pass `bookingFields` into cancellation UI
+- Validate cancellation reason from `bookingFields` first, with legacy enum fallback
+
 ## Blocked
+
+- Removing the legacy enum/column requires a schema change and should be handled as a separate approved cleanup
 
 ## Next Steps
 
-- Test the feature end-to-end
-- Verify all dropdown options work correctly
-- Verify dynamic label shows "(optional)" only when appropriate
+1. Add end-to-end coverage for configuring cancellation reason in Booking Questions
+2. Manually verify the Booking Questions editor in the browser
+3. Plan legacy enum/column cleanup as a separate schema-change PR
 
 ## Session Notes
 
-- Enum and column were already added to schema during planning phase
-- Migration was already created
+- 2026-07-07: M2 spec reviewed from `origin/feat/cancel-booking-required`; local enum/dropdown plan is stale for runtime behavior.

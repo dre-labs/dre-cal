@@ -1,6 +1,26 @@
 import { CancellationReasonRequirement } from "@calcom/prisma/enums";
 
-export function isCancellationReasonRequired(
+type CancellationReasonField = {
+  name: string;
+  required?: boolean;
+  hidden?: boolean;
+  label?: string;
+  defaultLabel?: string;
+  placeholder?: string;
+  defaultPlaceholder?: string;
+};
+
+export function getCancellationReasonField(bookingFields: unknown): CancellationReasonField | undefined {
+  if (!Array.isArray(bookingFields)) return undefined;
+
+  return bookingFields.find((field): field is CancellationReasonField => {
+    if (!field || typeof field !== "object") return false;
+    if (!("name" in field)) return false;
+    return field.name === "cancellationReason";
+  });
+}
+
+function isCancellationReasonRequiredForLegacySetting(
   setting: CancellationReasonRequirement | null | undefined,
   isHost: boolean
 ): boolean {
@@ -18,4 +38,17 @@ export function isCancellationReasonRequired(
     default:
       return false;
   }
+}
+
+export function isCancellationReasonRequired(
+  setting: CancellationReasonRequirement | null | undefined,
+  isHost: boolean,
+  bookingFields?: unknown
+): boolean {
+  const cancellationReasonField = getCancellationReasonField(bookingFields);
+  if (cancellationReasonField?.hidden) return false;
+
+  if (cancellationReasonField) return isHost || !!cancellationReasonField.required;
+
+  return isCancellationReasonRequiredForLegacySetting(setting, isHost);
 }

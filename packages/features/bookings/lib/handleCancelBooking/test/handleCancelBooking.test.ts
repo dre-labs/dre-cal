@@ -140,7 +140,6 @@ describe("Cancel Booking", () => {
         },
       },
     });
-
   });
 
   test("Should not cancel booking when required calendar event deletion fails", async () => {
@@ -1447,6 +1446,157 @@ describe("Cancel Booking", () => {
   });
 
   describe("Cancellation Reason Requirement", () => {
+    test("Should block attendee cancellation without reason when cancellationReason booking field is required", async () => {
+      const handleCancelBooking = (await import("@calcom/features/bookings/lib/handleCancelBooking")).default;
+
+      const booker = getBooker({
+        email: "booker@example.com",
+        name: "Booker",
+      });
+
+      const organizer = getOrganizer({
+        name: "Organizer",
+        email: "organizer@example.com",
+        id: 101,
+        schedules: [TestData.schedules.IstWorkHours],
+        credentials: [getGoogleCalendarCredential()],
+        selectedCalendars: [TestData.selectedCalendars.google],
+      });
+
+      const uidOfBookingToBeCancelled = "booking-field-required-attendee-test";
+      const idOfBookingToBeCancelled = 7999;
+      const { dateString: plus1DateString } = getDate({ dateIncrement: 1 });
+
+      await createBookingScenario(
+        getScenarioData({
+          eventTypes: [
+            {
+              id: 1,
+              slotInterval: 30,
+              length: 30,
+              requiresCancellationReason: "OPTIONAL_BOTH",
+              bookingFields: [
+                {
+                  defaultLabel: "reason_for_cancellation",
+                  type: "textarea",
+                  editable: "system-but-optional",
+                  name: "cancellationReason",
+                  defaultPlaceholder: "cancellation_reason_placeholder",
+                  required: true,
+                  views: [{ id: "cancel", label: "Cancel View" }],
+                },
+              ],
+              users: [{ id: 101 }],
+            },
+          ],
+          bookings: [
+            {
+              id: idOfBookingToBeCancelled,
+              uid: uidOfBookingToBeCancelled,
+              eventTypeId: 1,
+              userId: 101,
+              responses: {
+                email: booker.email,
+                name: booker.name,
+                location: { optionValue: "", value: BookingLocations.CalVideo },
+              },
+              status: BookingStatus.ACCEPTED,
+              startTime: `${plus1DateString}T05:00:00.000Z`,
+              endTime: `${plus1DateString}T05:30:00.000Z`,
+            },
+          ],
+          organizer,
+          apps: [TestData.apps["daily-video"]],
+        })
+      );
+
+      await expect(
+        handleCancelBooking({
+          bookingData: {
+            id: idOfBookingToBeCancelled,
+            uid: uidOfBookingToBeCancelled,
+            cancelledBy: booker.email,
+          },
+        })
+      ).rejects.toThrow("Cancellation reason is required");
+    });
+
+    test("Should allow host cancellation without reason when cancellationReason booking field is hidden", async () => {
+      const handleCancelBooking = (await import("@calcom/features/bookings/lib/handleCancelBooking")).default;
+
+      const booker = getBooker({
+        email: "booker@example.com",
+        name: "Booker",
+      });
+
+      const organizer = getOrganizer({
+        name: "Organizer",
+        email: "organizer@example.com",
+        id: 101,
+        schedules: [TestData.schedules.IstWorkHours],
+        credentials: [getGoogleCalendarCredential()],
+        selectedCalendars: [TestData.selectedCalendars.google],
+      });
+
+      const uidOfBookingToBeCancelled = "booking-field-hidden-host-test";
+      const idOfBookingToBeCancelled = 8000;
+      const { dateString: plus1DateString } = getDate({ dateIncrement: 1 });
+
+      await createBookingScenario(
+        getScenarioData({
+          eventTypes: [
+            {
+              id: 1,
+              slotInterval: 30,
+              length: 30,
+              requiresCancellationReason: "MANDATORY_BOTH",
+              bookingFields: [
+                {
+                  defaultLabel: "reason_for_cancellation",
+                  type: "textarea",
+                  editable: "system-but-optional",
+                  name: "cancellationReason",
+                  defaultPlaceholder: "cancellation_reason_placeholder",
+                  required: true,
+                  hidden: true,
+                  views: [{ id: "cancel", label: "Cancel View" }],
+                },
+              ],
+              users: [{ id: 101 }],
+            },
+          ],
+          bookings: [
+            {
+              id: idOfBookingToBeCancelled,
+              uid: uidOfBookingToBeCancelled,
+              eventTypeId: 1,
+              userId: 101,
+              responses: {
+                email: booker.email,
+                name: booker.name,
+                location: { optionValue: "", value: BookingLocations.CalVideo },
+              },
+              status: BookingStatus.ACCEPTED,
+              startTime: `${plus1DateString}T05:00:00.000Z`,
+              endTime: `${plus1DateString}T05:30:00.000Z`,
+            },
+          ],
+          organizer,
+          apps: [TestData.apps["daily-video"]],
+        })
+      );
+
+      const result = await handleCancelBooking({
+        bookingData: {
+          id: idOfBookingToBeCancelled,
+          uid: uidOfBookingToBeCancelled,
+          cancelledBy: organizer.email,
+        },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
     test("Should block host cancellation without reason when requiresCancellationReason is MANDATORY_BOTH", async () => {
       const handleCancelBooking = (await import("@calcom/features/bookings/lib/handleCancelBooking")).default;
 

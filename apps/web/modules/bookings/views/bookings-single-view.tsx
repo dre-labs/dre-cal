@@ -920,6 +920,7 @@ export default function Success(props: PageProps) {
                             }}
                             eventTypeMetadata={eventType.metadata}
                             requiresCancellationReason={eventType.requiresCancellationReason}
+                            bookingFields={eventType.bookingFields}
                             profile={{ name: props.profile.name, slug: props.profile.slug }}
                             recurringEvent={eventType.recurringEvent}
                             team={eventType?.team?.name}

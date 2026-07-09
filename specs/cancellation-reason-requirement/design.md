@@ -2,78 +2,74 @@
 
 ## Overview
 
-Add a dropdown setting in Event Type Advanced settings that allows hosts to configure when cancellation reasons are required from hosts and/or attendees.
+M2 changes cancellation reason configuration from a dedicated Event Type Advanced dropdown to a Booking Questions system field. The field should behave like `rescheduleReason`: event organizers can configure whether `cancellationReason` is required or hidden from Booking Questions, and cancellation flows read that booking field configuration.
 
 ## Problem Statement
 
-Currently, cancellation reasons are always optional. Hosts need the ability to require reasons for better tracking and accountability.
+Cancellation reason behavior was previously hardcoded for hosts and then implemented locally as an EventType enum/column. The M2 spec supersedes that plan because it keeps cancellation reason configuration in the existing `bookingFields` system and avoids another schema dependency.
 
 ## User Stories
 
-- As a host, I want to require cancellation reasons from attendees so that I understand why bookings are cancelled
-- As a host, I want to require my team to provide cancellation reasons so that we have records of why bookings were cancelled
-- As a host, I want to make cancellation reasons optional when they're not needed
+- As an event organizer, I want to require cancellation reasons from guests so that I understand why bookings are cancelled
+- As an event organizer, I want to configure cancellation reason from Booking Questions next to other system fields
+- As a guest, I want clear validation when a cancellation reason is required
 
 ## Technical Design
 
 ### Database Changes
 
-Add new enum `CancellationReasonRequirement` with values:
-- `MANDATORY_BOTH`
-- `MANDATORY_HOST_ONLY`
-- `MANDATORY_ATTENDEE_ONLY`
-- `OPTIONAL_BOTH`
+No new schema is required for M2. `Booking.cancellationReason` already stores the submitted reason, and `EventType.bookingFields` stores the field configuration.
 
-Add column `requiresCancellationReason` to EventType model with default `MANDATORY_HOST_ONLY`.
+The earlier `requiresCancellationReason` enum/column implementation remains as a legacy fallback until a separate schema cleanup is approved.
 
-Location: `packages/prisma/schema.prisma` (near `disableCancelling`/`disableRescheduling`)
+### Booking Fields
 
-### API Changes
+Add `cancellationReason` to `SystemField` and add a system field in `getBookingFieldsWithSystemFields`:
 
-Update `packages/features/bookings/lib/handleCancelBooking.ts` to validate cancellation reason based on:
-- Event type's `requiresCancellationReason` setting
-- Who is cancelling (host vs attendee)
+- `name: "cancellationReason"`
+- `type: "textarea"`
+- `editable: "system-but-optional"`
+- `defaultLabel: "reason_for_cancellation"`
+- `defaultPlaceholder: "cancellation_reason_placeholder"`
+- `required: false`
+- `views: [{ id: "cancel", label: "Cancel View" }]`
 
-### UI Changes
+### Cancel Booking UI
 
-**Event Type Settings**
+`CancelBooking` receives `bookingFields` and reads the `cancellationReason` field:
 
-Location: `apps/web/modules/event-types/components/tabs/advanced/EventAdvancedTab.tsx`
+- If the field is hidden, do not render or require the textarea
+- If the field is required, require a reason from guests and hosts
+- Hosts continue to require a reason by default for backward compatibility
+- Use custom field label/placeholder when present
 
-Add dropdown after Booking Questions section, before RequiresConfirmationController:
-- Label: "Require cancellation reason"
-- Description: "Ask for a reason when someone cancels a booking"
-- Options: Mandatory for both, Mandatory for host only (default), Mandatory for attendee only, Optional for both
+### Backend Validation
 
-**Cancel Booking**
+`handleCancelBooking` validates against `eventType.bookingFields` first:
 
-Location: `apps/web/components/booking/CancelBooking.tsx`
+- Hidden field: reason not required
+- Required field: reason required for guests and hosts
+- Missing field: fall back to the legacy `requiresCancellationReason` setting
 
-- Add `requiresCancellationReason` prop
-- Replace hardcoded `hostMissingCancellationReason` logic with configurable validation based on the setting
-- Show required indicator on textarea when reason is required
+### Form Builder
+
+Booking Questions should show cancellation reason as a view-specific system field, similar to reschedule reason.
 
 ## Data Flow
 
-1. EventType stores `requiresCancellationReason` in database
-2. `getEventTypesFromDB` (`apps/web/lib/booking.ts`) includes the field in select
-3. Value flows through page props to booking views
-4. `CancelBooking` component uses it for validation
-
-Files requiring prop threading:
-- `apps/web/lib/booking.ts`
-- `apps/web/modules/bookings/views/bookings-single-view.tsx`
-- `apps/web/components/dialog/CancelBookingDialog.tsx`
+1. `getBookingFieldsWithSystemFields` ensures `cancellationReason` exists in event type booking fields
+2. Booking Questions stores any required/hidden customization in `EventType.bookingFields`
+3. Booking detail and cancel dialog pages pass `eventType.bookingFields` to `CancelBooking`
+4. `handleCancelBooking` reads `eventType.bookingFields` for server-side validation
 
 ## Edge Cases
 
-- Platform users: Should respect the setting
-- Team bookings: Setting applies regardless of team context
-- Null column value: Default to `MANDATORY_HOST_ONLY` behavior
-- Default event types (no eventTypeId): Use default `MANDATORY_HOST_ONLY`
+- Existing event types without the field use the legacy fallback until they are saved with generated system fields
+- Platform users still respect `skipCancellationReasonValidation`
+- Hidden field should not be required
+- Default event types should get the default optional field from `getBookingFieldsWithSystemFields`
 
 ## Out of Scope
 
-- Reschedule reason configuration (separate feature)
 - Custom reason dropdown options
 - Reason analytics/reporting
