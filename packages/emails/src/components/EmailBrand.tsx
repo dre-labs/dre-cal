@@ -3,7 +3,7 @@ import Row from "./Row";
 
 const EmailBrand = () => {
   const logoImage = `${WEBAPP_URL}/emails/dre-icon-color.png`;
-  const brandName = "DRE_cal";
+  const brandName = "DRE Cal";
 
   return (
     <Row border="0" style={{ borderCollapse: "collapse", borderSpacing: "0px" }}>
