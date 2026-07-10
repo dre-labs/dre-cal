@@ -49,6 +49,7 @@ type UserPageProps = {
     considerUnpublished: boolean;
     orgSlug?: string | null;
     name?: string | null;
+    bio?: string | null;
     teamSlug?: string | null;
   };
   eventTypes: ({
@@ -150,6 +151,9 @@ export const getServerSideProps: GetServerSideProps<UserPageProps> = async (cont
           requestedSlug: null,
           slug: user.profile.organization.slug,
           id: user.profile.organization.id,
+          name: user.profile.organization.name,
+          logoUrl: user.profile.organization.logoUrl,
+          bannerUrl: user.profile.organization.bannerUrl,
           brandColor: user.profile.organization.brandColor,
           darkBrandColor: user.profile.organization.darkBrandColor,
           theme: user.profile.organization.theme,
@@ -183,6 +187,16 @@ export const getServerSideProps: GetServerSideProps<UserPageProps> = async (cont
 
   const markdownStrippedBio = stripMarkdown(user?.bio || "");
   const org = usersInOrgContext[0].profile.organization;
+  const orgProfileDetails = org?.id
+    ? await prisma.team.findUnique({
+        where: {
+          id: org.id,
+        },
+        select: {
+          bio: true,
+        },
+      })
+    : null;
 
   return {
     props: {
@@ -199,6 +213,7 @@ export const getServerSideProps: GetServerSideProps<UserPageProps> = async (cont
         considerUnpublished: !isARedirectFromNonOrgLink && org?.slug === null,
         orgSlug: currentOrgDomain,
         name: org?.name ?? null,
+        bio: orgProfileDetails?.bio ?? null,
       },
       eventTypes,
       safeBio,

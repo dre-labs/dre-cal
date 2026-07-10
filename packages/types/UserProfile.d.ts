@@ -1,7 +1,26 @@
 import type { Team } from "@calcom/prisma/client";
 
-type OrganizationWithRequestedSlug = Pick<Team, "name" | "id" | "slug" | "calVideoLogo", "bannerUrl"> & {
-  requestedSlug: string | null;
+type OrganizationWithRequestedSlug = {
+  id: Team["id"];
+  name: Team["name"];
+  slug: Team["slug"];
+  requestedSlug?: string | null;
+  logoUrl?: Team["logoUrl"];
+  calVideoLogo?: Team["calVideoLogo"];
+  bannerUrl?: Team["bannerUrl"];
+  bio?: Team["bio"];
+  brandColor?: Team["brandColor"];
+  darkBrandColor?: Team["darkBrandColor"];
+  theme?: Team["theme"];
+  metadata?: Team["metadata"];
+  organizationSettings?: {
+    allowSEOIndexing?: boolean;
+    orgProfileRedirectsToVerifiedDomain?: boolean;
+    disableAutofillOnBookingPage?: boolean;
+    lockEventTypeCreationForUsers?: boolean;
+  } | null;
+  isPlatform?: Team["isPlatform"];
+  hideBranding?: Team["hideBranding"];
 };
 
 export type OrgProfile = {

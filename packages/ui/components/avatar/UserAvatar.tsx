@@ -3,14 +3,13 @@ import { getUserAvatarUrl } from "@calcom/lib/getAvatarUrl";
 import type { User } from "@calcom/prisma/client";
 import type { UserProfile } from "@calcom/types/UserProfile";
 import classNames from "@calcom/ui/classNames";
-
 import { Avatar } from "./Avatar";
 
 type Organization = {
   id: number;
   slug: string | null;
-  requestedSlug: string | null;
-  logoUrl?: string;
+  requestedSlug?: string | null;
+  logoUrl?: string | null;
 };
 
 type UserAvatarProps = Omit<React.ComponentProps<typeof Avatar>, "alt" | "imageSrc"> & {

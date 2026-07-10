@@ -25,7 +25,7 @@ type Props = {
   isBrandingHidden: boolean;
   isSEOIndexable: boolean | null;
   themeBasis: null | string;
-  orgBannerUrl: null;
+  orgBannerUrl: string | null;
 };
 
 async function processReschedule({

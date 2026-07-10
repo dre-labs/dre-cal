@@ -267,18 +267,27 @@ interface SettingsPermissions {
   canUpdateOrganization?: boolean;
 }
 
+type OrgBranding = {
+  id?: number;
+  slug?: string;
+  name?: string;
+  logoUrl?: string | null;
+  fullDomain?: string | null;
+} | null;
+
 const useTabs = ({
   isDelegationCredentialEnabled,
   isPbacEnabled,
+  orgBranding,
   permissions,
 }: {
   isDelegationCredentialEnabled: boolean;
   isPbacEnabled: boolean;
+  orgBranding: OrgBranding;
   permissions?: SettingsPermissions;
 }) => {
   const session = useSession();
   const { data: user } = trpc.viewer.me.get.useQuery({ includePasswordAdded: true });
-  const orgBranding = null as { id?: number; slug?: string; name?: string; logoUrl?: string | null } | null;
   const isAdmin = session.data?.user.role === UserPermissionRole.ADMIN;
 
   const processTabsMemod = useMemo(() => {
@@ -397,6 +406,7 @@ interface SettingsSidebarContainerProps {
   navigationIsOpenedOnMobile?: boolean;
   bannersHeight?: number;
   teamFeatures?: Record<number, TeamFeatures>;
+  orgBranding?: OrgBranding;
   permissions?: SettingsPermissions;
 }
 
@@ -405,6 +415,7 @@ const SettingsSidebarContainer = ({
   navigationIsOpenedOnMobile,
   bannersHeight,
   teamFeatures,
+  orgBranding = null,
   permissions,
 }: SettingsSidebarContainerProps) => {
   const { t } = useLocale();
@@ -412,6 +423,7 @@ const SettingsSidebarContainer = ({
   const tabsWithPermissions = useTabs({
     isDelegationCredentialEnabled: false,
     isPbacEnabled: false,
+    orgBranding,
     permissions,
   });
 
@@ -515,10 +527,17 @@ type SettingsLayoutProps = {
   children: React.ReactNode;
   containerClassName?: string;
   teamFeatures?: Record<number, TeamFeatures>;
+  orgBranding?: OrgBranding;
   permissions?: SettingsPermissions;
 } & ComponentProps<typeof Shell>;
 
-function SettingsLayoutAppDirClient({ children, teamFeatures, permissions, ...rest }: SettingsLayoutProps) {
+function SettingsLayoutAppDirClient({
+  children,
+  teamFeatures,
+  orgBranding,
+  permissions,
+  ...rest
+}: SettingsLayoutProps) {
   const _pathname = usePathname();
   const state = useState(false);
   const [sideContainerOpen, setSideContainerOpen] = state;
@@ -549,6 +568,7 @@ function SettingsLayoutAppDirClient({ children, teamFeatures, permissions, ...re
           sideContainerOpen={sideContainerOpen}
           setSideContainerOpen={setSideContainerOpen}
           teamFeatures={teamFeatures}
+          orgBranding={orgBranding}
           permissions={permissions}
         />
       }
@@ -572,6 +592,7 @@ type SidebarContainerElementProps = {
   bannersHeight?: number;
   setSideContainerOpen: React.Dispatch<React.SetStateAction<boolean>>;
   teamFeatures?: Record<number, TeamFeatures>;
+  orgBranding?: OrgBranding;
   permissions?: SettingsPermissions;
 };
 
@@ -580,6 +601,7 @@ const SidebarContainerElement = ({
   bannersHeight,
   setSideContainerOpen,
   teamFeatures,
+  orgBranding,
   permissions,
 }: SidebarContainerElementProps) => {
   const { t } = useLocale();
@@ -597,6 +619,7 @@ const SidebarContainerElement = ({
         navigationIsOpenedOnMobile={sideContainerOpen}
         bannersHeight={bannersHeight}
         teamFeatures={teamFeatures}
+        orgBranding={orgBranding}
         permissions={permissions}
       />
     </>
