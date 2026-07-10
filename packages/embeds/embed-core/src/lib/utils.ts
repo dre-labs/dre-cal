@@ -26,25 +26,37 @@ export const getErrorString = ({
  * NOTE: This is a duplicate of the function in @calcom/lib/hooks/useRouterQuery.ts. It has to be here because embed is published to npm and shouldn't refer to any private package
  */
 export function fromEntriesWithDuplicateKeys(entries: IterableIterator<[string, string]> | null) {
-  const result: Record<string, string | string[]> = {};
+  const result = new Map<string, string | string[]>();
 
   if (entries === null) {
-    return result;
+    return {};
   }
 
-  for (const [key, value] of entries) {
-    if (Object.prototype.hasOwnProperty.call(result, key)) {
-      let currentValue = result[key];
+  let entry = entries.next();
+  while (!entry.done) {
+    const [key, value] = entry.value;
+    if (result.has(key)) {
+      let currentValue = result.get(key);
+      if (currentValue === undefined) {
+        entry = entries.next();
+        continue;
+      }
       if (!Array.isArray(currentValue)) {
         currentValue = [currentValue];
       }
       currentValue.push(value);
-      result[key] = currentValue;
+      result.set(key, currentValue);
     } else {
-      result[key] = value;
+      result.set(key, value);
     }
+    entry = entries.next();
   }
-  return result;
+
+  const resultObject: Record<string, string | string[]> = {};
+  result.forEach((value, key) => {
+    resultObject[key] = value;
+  });
+  return resultObject;
 }
 
 export function isParamValuePresentInUrlSearchParams({
