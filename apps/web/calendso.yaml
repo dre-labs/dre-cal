@@ -4,12 +4,12 @@ info:
   description: The open source Calendly alternative.
   contact:
     name: Support
-    email: support@cal.com
+    email: support@cal.dre.app
   license:
     name: MIT License
     url: "https://opensource.org/licenses/MIT"
   version: 1.0.0
-  termsOfService: "https://cal.com/terms"
+  termsOfService: "https://cal.dre.app/terms"
 server:
   url: "http://localhost:{port}"
   description: Local Development Server
