@@ -1,24 +1,14 @@
-import { ROADMAP } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import useMeQuery from "@calcom/trpc/react/hooks/useMeQuery";
 import classNames from "@calcom/ui/classNames";
 import { Avatar } from "@calcom/ui/components/avatar";
+import { Menu, MenuItem, MenuPopup, MenuSeparator, MenuTrigger } from "@coss/ui/components/menu";
 import {
-  Menu,
-  MenuItem,
-  MenuPopup,
-  MenuSeparator,
-  MenuSub,
-  MenuSubPopup,
-  MenuSubTrigger,
-  MenuTrigger,
-} from "@coss/ui/components/menu";
-import {
+  BuildingIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   CircleHelpIcon,
   LogOutIcon,
-  MapIcon,
   MoonIcon,
   SettingsIcon,
   UserIcon,
@@ -170,6 +160,12 @@ export function UserDropdown({ small }: UserDropdownProps) {
               <SettingsIcon />
               {t("my_settings")}
             </MenuItem>
+            {!!user?.organization?.id && (
+              <MenuItem render={<Link href="/settings/organizations/profile" />}>
+                <BuildingIcon />
+                {t("organization_profile")}
+              </MenuItem>
+            )}
             <MenuItem render={<Link href="/settings/my-account/out-of-office" />}>
               <MoonIcon />
               {t("out_of_office")}
@@ -177,10 +173,6 @@ export function UserDropdown({ small }: UserDropdownProps) {
             <MenuSeparator />
           </>
 
-          <MenuItem render={<a href={ROADMAP} target="_blank" rel="noreferrer" />}>
-            <MapIcon />
-            {t("visit_roadmap")}
-          </MenuItem>
           <MenuItem onClick={handleHelpClick}>
             <CircleHelpIcon />
             {t("help")}

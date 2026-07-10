@@ -3,6 +3,8 @@
  * prepends https:// to make it valid for URL parsing.
  * This handles cases where environment variables have their protocol stripped
  */
+import process from "node:process";
+
 function ensureProtocol(url: string | undefined): string {
   if (!url) return "";
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
@@ -108,7 +110,6 @@ export const APPLE_TOUCH_ICON = "/dre-icon-color.svg";
 export const MSTILE_ICON = "/mstile-150x150.png";
 export const ANDROID_CHROME_ICON_192 = "/dre-icon-color.svg";
 export const ANDROID_CHROME_ICON_256 = "/dre-icon-color.svg";
-export const ROADMAP = "https://cal.dre.app/roadmap";
 export const DESKTOP_APP_LINK = "https://cal.dre.app/download";
 export const JOIN_COMMUNITY = "https://cal.dre.app/community";
 export const POWERED_BY_URL = "https://cal.dre.app/booking";
