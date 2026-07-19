@@ -22,7 +22,7 @@ export function safeStringify(obj: unknown) {
     // Third-party API errors (e.g. gaxios) embed request configs containing auth headers;
     // redact them so credentials never reach the logging system
     return JSON.stringify(obj, redactSensitiveValues);
-  } catch (e) {
+  } catch {
     return obj;
   }
 }
