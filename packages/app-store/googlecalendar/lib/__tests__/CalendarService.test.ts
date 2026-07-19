@@ -868,6 +868,75 @@ describe("createEvent", () => {
 
     log.info("createEvent with hangoutLink patch test passed");
   });
+
+  test("should still return the created event when the hangoutLink patch fails", async () => {
+    const calendarService = BuildCalendarService(mockCredential);
+    setFullMockOAuthManagerRequest();
+
+    const mockHangoutLink = "https://meet.google.com/abc-defg-hij";
+    const mockGoogleEvent = {
+      id: "mock-event-with-hangout",
+      summary: "Test Meeting with Hangout",
+      start: { dateTime: "2024-06-15T10:00:00Z", timeZone: "UTC" },
+      end: { dateTime: "2024-06-15T11:00:00Z", timeZone: "UTC" },
+      hangoutLink: mockHangoutLink,
+      iCalUID: "mock-ical-uid",
+    };
+
+    const eventsInsertMock = vi.fn().mockResolvedValue({
+      data: mockGoogleEvent,
+    });
+    const rateLimitError = Object.assign(new Error("Rate Limit Exceeded"), {
+      code: 403,
+      config: {},
+    });
+    const eventsPatchMock = vi.fn().mockRejectedValue(rateLimitError);
+
+    calendarMock.calendar_v3.Calendar().events.insert = eventsInsertMock;
+    calendarMock.calendar_v3.Calendar().events.patch = eventsPatchMock;
+
+    const testCalEvent = {
+      type: "test-event-type",
+      uid: "cal-event-uid-hangout-patch-fail",
+      title: "Test Meeting with Hangout",
+      startTime: "2024-06-15T10:00:00Z",
+      endTime: "2024-06-15T11:00:00Z",
+      organizer: {
+        id: 1,
+        name: "Test Organizer",
+        email: "organizer@example.com",
+        timeZone: "UTC",
+        language: { translate: (...args: any[]) => args[0], locale: "en" },
+      },
+      attendees: [],
+      location: "Test Location",
+      calendarDescription: "Test meeting description",
+      destinationCalendar: [
+        {
+          id: 1,
+          integration: "google_calendar",
+          externalId: "primary",
+          primaryEmail: null,
+          userId: mockCredential.userId,
+          eventTypeId: null,
+          credentialId: mockCredential.id,
+          delegationCredentialId: null,
+          createdAt: new Date("2024-06-15T11:00:00Z"),
+          updatedAt: new Date("2024-06-15T11:00:00Z"),
+          customCalendarReminder: null,
+        },
+      ],
+    };
+
+    const result = await calendarService.createEvent(testCalEvent, mockCredential.id);
+
+    expect(eventsPatchMock).toHaveBeenCalledTimes(1);
+    expect(result.id).toBe("mock-event-with-hangout");
+    expect(result.iCalUID).toBe("mock-ical-uid");
+    expect(result.additionalInfo.hangoutLink).toBe(mockHangoutLink);
+
+    log.info("createEvent with failing hangoutLink patch test passed");
+  });
 });
 
 describe("updateEvent", () => {
