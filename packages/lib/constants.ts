@@ -100,8 +100,8 @@ export const PUBLIC_QUICK_AVAILABILITY_ROLLOUT =
 
 /** @deprecated use `WEBAPP_URL` */
 export const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_WEBAPP_URL || `https://${process.env.VERCEL_URL}`;
-export const LOGO = "/calcom-logo-white-word.svg";
-export const LOGO_DARK = "/cal-logo-word-black.svg";
+export const LOGO = "/dre-cal-logo-word.svg";
+export const LOGO_DARK = "/dre-cal-logo-word.svg";
 export const LOGO_ICON = "/dre-icon-color.svg";
 export const AVATAR_FALLBACK = "/avatar.svg";
 export const FAVICON_16 = "/dre-icon-color.svg";
