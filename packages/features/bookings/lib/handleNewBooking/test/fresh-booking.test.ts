@@ -586,7 +586,7 @@ describe("handleNewBooking", () => {
       );
 
       test(
-        `an error in creating a calendar event should not stop the booking creation - Current behaviour is wrong as the booking is created but no-one is notified of it`,
+        `an error in creating a calendar event should not stop the booking creation and confirmation emails are still sent`,
 
         async ({ emails }) => {
           const handleNewBooking = getNewBookingHandler();
@@ -683,8 +683,19 @@ describe("handleNewBooking", () => {
             ],
           });
 
-          // FIXME: We should send Broken Integration emails on calendar event creation failure
-          // expectCalendarEventCreationFailureEmails({ booker, organizer, emails });
+          const iCalUID = expectICalUIDAsString(createdBooking.iCalUID);
+
+          // The calendar sync failed, but participants must still be notified of the booking
+          expectSuccessfulBookingCreationEmails({
+            booking: {
+              uid: createdBooking.uid!,
+              urlOrigin: WEBAPP_URL,
+            },
+            booker,
+            organizer,
+            emails,
+            iCalUID,
+          });
 
           expectBookingCreatedWebhookToHaveBeenFired({
             booker,

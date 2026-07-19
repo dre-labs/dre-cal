@@ -83,11 +83,11 @@ import short, { uuid } from "short-uuid";
 import { v5 as uuidv5 } from "uuid";
 import type { BookingRepository } from "../../repositories/BookingRepository";
 import { BookingActionMap, type BookingActionType, BookingEmailSmsHandler } from "../BookingEmailSmsHandler";
+import { ensureRequiredCalendarSyncSucceeded } from "../calendarSync/ensureRequiredCalendarSync";
 import { getAllCredentialsIncludeServiceAccountKey } from "../getAllCredentialsForUsersOnEvent/getAllCredentials";
 import { refreshCredentials } from "../getAllCredentialsForUsersOnEvent/refreshCredentials";
 import getBookingDataSchema from "../getBookingDataSchema";
 import type { LuckyUserService } from "../getLuckyUser";
-import { ensureRequiredCalendarSyncSucceeded } from "../calendarSync/ensureRequiredCalendarSync";
 import { checkActiveBookingsLimitForBooker } from "../handleNewBooking/checkActiveBookingsLimitForBooker";
 import { checkIfBookerEmailIsBlocked } from "../handleNewBooking/checkIfBookerEmailIsBlocked";
 import type { Booking } from "../handleNewBooking/createBooking";
@@ -2090,6 +2090,8 @@ async function handler(
     referencesToCreate = createManager.referencesToCreate;
     videoCallUrl = evt.videoCallData?.url ? evt.videoCallData.url : null;
 
+    const additionalInformation: AdditionalInformation = {};
+
     if (results.length > 0 && results.every((res) => !res.success)) {
       const error = {
         errorCode: "BookingCreatingMeetingFailed",
@@ -2100,9 +2102,10 @@ async function handler(
         `EventManager.create failure in some of the integrations ${organizerUser.username}`,
         safeStringify({ error, results })
       );
+      // Surface the integration failures in the confirmation emails (sent below) instead of
+      // silently dropping them: the booking exists in our DB, so the participants must be told.
+      evt.appsStatus = handleAppsStatus(results, booking, reqAppsStatus);
     } else {
-      const additionalInformation: AdditionalInformation = {};
-
       if (results.length) {
         // Handle Google Meet results
         // We use the original booking location since the evt location changes to daily
@@ -2177,24 +2180,27 @@ async function handler(
           });
         }
       }
-      if (!noEmail) {
-        if (!isDryRun && !(eventType.seatsPerTimeSlot && rescheduleUid)) {
-          await emailsAndSmsHandler.send({
-            action: BookingActionMap.confirmed,
-            data: {
-              eventType: {
-                metadata: eventType.metadata,
-                schedulingType: eventType.schedulingType,
-              },
-              eventNameObject,
-              evt,
-              additionalInformation,
-              additionalNotes,
-              customInputs,
+    }
+
+    // Confirmation emails are sent regardless of integration success: a failed calendar or
+    // video sync must never leave the organizer and attendee without a booking confirmation.
+    if (!noEmail) {
+      if (!isDryRun && !(eventType.seatsPerTimeSlot && rescheduleUid)) {
+        await emailsAndSmsHandler.send({
+          action: BookingActionMap.confirmed,
+          data: {
+            eventType: {
+              metadata: eventType.metadata,
+              schedulingType: eventType.schedulingType,
             },
-          });
-          bookingEmailsAndSmsTaskerAction = BookingActionMap.confirmed;
-        }
+            eventNameObject,
+            evt,
+            additionalInformation,
+            additionalNotes,
+            customInputs,
+          },
+        });
+        bookingEmailsAndSmsTaskerAction = BookingActionMap.confirmed;
       }
     }
   } else {
