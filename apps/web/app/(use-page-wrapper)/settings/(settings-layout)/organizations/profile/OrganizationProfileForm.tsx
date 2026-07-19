@@ -4,10 +4,8 @@ import SectionBottomActions from "@calcom/features/settings/SectionBottomActions
 import { getPlaceholderAvatar } from "@calcom/lib/defaultAvatarImage";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { Button } from "@calcom/ui/components/button";
-import { TextAreaField } from "@calcom/ui/components/form/inputs/Input";
-import { Label } from "@calcom/ui/components/form/inputs/Label";
-import { TextField } from "@calcom/ui/components/form/inputs/TextField";
-import ImageUploader from "@calcom/ui/components/image-uploader/ImageUploader";
+import { Label, TextAreaField, TextField } from "@calcom/ui/components/form";
+import { ImageUploader } from "@calcom/ui/components/image-uploader";
 import { showToast } from "@calcom/ui/components/toast";
 import type { ChangeEvent, FormEvent } from "react";
 import { useMemo, useState, useTransition } from "react";

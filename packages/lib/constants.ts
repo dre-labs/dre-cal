@@ -1,10 +1,10 @@
+/* biome-ignore-all lint/correctness/noProcessGlobal: this file is bundled for the edge runtime (og image route), where importing node:process breaks the build */
+
 /**
  * Ensures URL has a protocol prefix. If the URL doesn't start with http:// or https://,
  * prepends https:// to make it valid for URL parsing.
  * This handles cases where environment variables have their protocol stripped
  */
-import process from "node:process";
-
 function ensureProtocol(url: string | undefined): string {
   if (!url) return "";
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
