@@ -8,6 +8,7 @@ import { _generateMetadata, getTranslate } from "app/_utils";
 import { cookies, headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { canManageMember } from "../../../../(main-nav)/teams/lib/teamMemberManagement";
+import { getCurrentOrganizationId } from "../lib/getCurrentOrganization";
 
 export const generateMetadata = async () =>
   await _generateMetadata(
@@ -27,7 +28,10 @@ const Page = async ({ searchParams }: PageProps) => {
     return redirect("/auth/login?callbackUrl=/settings/organizations/members");
   }
 
-  const organizationId = session.user.profile?.organizationId ?? session.user.org?.id ?? null;
+  const organizationId = await getCurrentOrganizationId({
+    user: session.user,
+    userId: session.user.id,
+  });
   if (!organizationId) {
     return notFound();
   }

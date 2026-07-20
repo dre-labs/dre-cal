@@ -2,6 +2,7 @@ import { getServerSession } from "@calcom/features/auth/lib/getServerSession";
 import SettingsHeader from "@calcom/features/settings/appDir/SettingsHeader";
 import prisma from "@calcom/prisma";
 import { UserPermissionRole } from "@calcom/prisma/enums";
+import { Button } from "@calcom/ui/components/button";
 import { buildLegacyRequest } from "@lib/buildLegacyCtx";
 import type { PageProps } from "app/_types";
 import { _generateMetadata, getTranslate } from "app/_utils";
@@ -68,11 +69,9 @@ const Page = async ({ searchParams }: PageProps) => {
             />
             <span className="text-subtle mt-1 block text-sm">{t("organization_slug_description")}</span>
           </label>
-          <button
-            type="submit"
-            className="bg-emphasis text-inverted hover:bg-emphasis/90 rounded-md px-4 py-2 text-sm font-semibold">
+          <Button color="primary" type="submit">
             {t("create")}
-          </button>
+          </Button>
         </form>
       </div>
     </SettingsHeader>

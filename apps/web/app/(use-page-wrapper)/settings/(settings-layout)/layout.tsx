@@ -4,6 +4,7 @@ import { MembershipRole } from "@calcom/prisma/enums";
 import { buildLegacyRequest } from "@lib/buildLegacyCtx";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getCurrentOrganizationId } from "./organizations/lib/getCurrentOrganization";
 import type { SettingsLayoutProps } from "./SettingsLayoutAppDirClient";
 import SettingsLayoutAppDirClient from "./SettingsLayoutAppDirClient";
 
@@ -14,7 +15,7 @@ export default async function SettingsLayoutAppDir(props: SettingsLayoutProps) {
     return redirect("/auth/login");
   }
 
-  const organizationId = session.user.profile?.organizationId ?? session.user.org?.id ?? null;
+  const organizationId = await getCurrentOrganizationId({ user: session.user, userId });
   const organization = organizationId
     ? await prisma.team.findUnique({
         where: {

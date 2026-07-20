@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { assertCanManageMember } from "../../../../(main-nav)/teams/lib/teamMemberManagement";
+import { getCurrentOrganizationId } from "../lib/getCurrentOrganization";
 
 const MEMBERS_PATH = "/settings/organizations/members";
 
@@ -49,7 +50,7 @@ const requireOrgAdmin = async (): Promise<OrgAdminContext | null> => {
   const userId = session?.user?.id;
   if (!userId) return null;
 
-  const organizationId = session.user.profile?.organizationId ?? session.user.org?.id ?? null;
+  const organizationId = await getCurrentOrganizationId({ user: session.user, userId });
   if (!organizationId) return null;
 
   const membership = await prisma.membership.findFirst({

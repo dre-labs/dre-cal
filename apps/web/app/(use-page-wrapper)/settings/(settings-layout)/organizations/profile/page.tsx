@@ -6,6 +6,7 @@ import { buildLegacyRequest } from "@lib/buildLegacyCtx";
 import { _generateMetadata, getTranslate } from "app/_utils";
 import { cookies, headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import { getCurrentOrganizationId } from "../lib/getCurrentOrganization";
 import { OrganizationProfileForm } from "./OrganizationProfileForm";
 
 export const generateMetadata = async () =>
@@ -25,7 +26,10 @@ const Page = async () => {
     return redirect("/auth/login?callbackUrl=/settings/organizations/profile");
   }
 
-  const organizationId = session.user.profile?.organizationId ?? session.user.org?.id ?? null;
+  const organizationId = await getCurrentOrganizationId({
+    user: session.user,
+    userId: session.user.id,
+  });
   if (!organizationId) {
     return notFound();
   }

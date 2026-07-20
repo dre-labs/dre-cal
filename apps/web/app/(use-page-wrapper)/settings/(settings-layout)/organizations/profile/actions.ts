@@ -9,6 +9,7 @@ import { buildLegacyRequest } from "@lib/buildLegacyCtx";
 import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { z } from "zod";
+import { getCurrentOrganizationId } from "../lib/getCurrentOrganization";
 
 const organizationProfileSchema = z.object({
   name: z.string().trim().min(1).max(100),
@@ -42,7 +43,10 @@ export async function updateOrganizationProfile(
       throw new ErrorWithCode(ErrorCode.Unauthorized, "Not signed in");
     }
 
-    const organizationId = session.user.profile?.organizationId ?? session.user.org?.id ?? null;
+    const organizationId = await getCurrentOrganizationId({
+      user: session.user,
+      userId: session.user.id,
+    });
     if (!organizationId) {
       throw new ErrorWithCode(ErrorCode.NotFound, "Organization not found");
     }

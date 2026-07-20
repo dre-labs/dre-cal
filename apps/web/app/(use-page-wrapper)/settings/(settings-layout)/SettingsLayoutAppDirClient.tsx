@@ -235,13 +235,9 @@ type OrgBranding = {
 } | null;
 
 const useTabs = ({
-  isDelegationCredentialEnabled,
-  isPbacEnabled,
   orgBranding,
   permissions,
 }: {
-  isDelegationCredentialEnabled: boolean;
-  isPbacEnabled: boolean;
   orgBranding: OrgBranding;
   permissions?: SettingsPermissions;
 }) => {
@@ -263,50 +259,8 @@ const useTabs = ({
           (child) => permissions?.canUpdateOrganization || !organizationAdminKeys.includes(child.name)
         );
 
-        // Add delegation-credential menu item only if feature flag is enabled
-        if (isDelegationCredentialEnabled) {
-          newArray.push({
-            name: "delegation_credential",
-            href: "/settings/organizations/delegation-credential",
-            trackingMetadata: { section: "organization", page: "delegation_credential" },
-          });
-        }
-
-        // Add pbac menu item - show opt-in page if not enabled, regular page if enabled
-        if (isPbacEnabled) {
-          if (permissions?.canViewRoles) {
-            newArray.push({
-              name: "roles_and_permissions",
-              href: "/settings/organizations/roles",
-              trackingMetadata: { section: "organization", page: "roles_and_permissions" },
-            });
-          }
-
-          if (permissions?.canViewOrganizationBilling) {
-            newArray.push({
-              name: "billing",
-              href: "/settings/organizations/billing",
-              trackingMetadata: { section: "organization", page: "billing" },
-            });
-          }
-        } else {
-          if (permissions?.canUpdateOrganization) {
-            newArray.push({
-              name: "billing",
-              href: "/settings/organizations/billing",
-              trackingMetadata: { section: "organization", page: "billing" },
-            });
-          }
-          // Show roles page (modal will appear if PBAC not enabled)
-          if (permissions?.canUpdateOrganization) {
-            newArray.push({
-              name: "roles",
-              href: "/settings/organizations/roles",
-              isBadged: true, // Show "New" badge,
-              trackingMetadata: { section: "organization", page: "roles" },
-            });
-          }
-        }
+        // Delegation credential, roles and billing pages don't exist in this fork, so no
+        // menu items are added for them here - the links would only lead to 404s.
 
         return {
           ...tab,
@@ -346,7 +300,7 @@ const useTabs = ({
       if (isAdmin) return true;
       return !adminRequiredKeys.includes(tab.name);
     });
-  }, [isAdmin, orgBranding, user, isDelegationCredentialEnabled, isPbacEnabled, permissions]);
+  }, [isAdmin, orgBranding, user, permissions]);
 
   return processTabsMemod;
 };
@@ -385,8 +339,6 @@ const SettingsSidebarContainer = ({
   const { t } = useLocale();
 
   const tabsWithPermissions = useTabs({
-    isDelegationCredentialEnabled: false,
-    isPbacEnabled: false,
     orgBranding,
     permissions,
   });
