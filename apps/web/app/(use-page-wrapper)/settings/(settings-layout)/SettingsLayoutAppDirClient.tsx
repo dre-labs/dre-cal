@@ -198,11 +198,6 @@ const getTabs = (
         trackingMetadata: { section: "admin", page: "create_org" },
       });
 
-      tab.children?.push({
-        name: "create_license_key",
-        href: "/settings/license-key/new",
-        trackingMetadata: { section: "admin", page: "create_license_key" },
-      });
     }
   }
 

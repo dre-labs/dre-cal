@@ -236,6 +236,12 @@ const nextConfig = (phase: string): NextConfig => {
     ],
     experimental: {
       optimizePackageImports: ["@calcom/ui"],
+      serverActions: {
+        // Image pickers post their file inline as a base64 data URL, which is about a third
+        // larger than the file. The organization banner allows 5MB, so the default 1MB cap
+        // rejected every real upload with a 500.
+        bodySizeLimit: "8mb",
+      },
     },
     productionBrowserSourceMaps: true,
     transpilePackages: [

@@ -3,6 +3,7 @@
 import { getServerSession } from "@calcom/features/auth/lib/getServerSession";
 import { ErrorCode } from "@calcom/lib/errorCodes";
 import { ErrorWithCode } from "@calcom/lib/errors";
+import { uploadLogo } from "@calcom/lib/server/avatar";
 import prisma from "@calcom/prisma";
 import { MembershipRole } from "@calcom/prisma/enums";
 import { buildLegacyRequest } from "@lib/buildLegacyCtx";
@@ -30,6 +31,23 @@ export type OrganizationProfileActionResult =
 const normalizeOptionalText = (value: string | null) => {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
+};
+
+const storeImageIfUploaded = async ({
+  teamId,
+  value,
+  isBanner,
+}: {
+  teamId: number;
+  value: string | null;
+  isBanner: boolean;
+}): Promise<string | null> => {
+  const image = normalizeOptionalText(value);
+  if (!image) return null;
+  // Anything that isn't a fresh upload is already a stored URL.
+  if (!image.startsWith("data:image/")) return image;
+
+  return await uploadLogo({ teamId, logo: image, isBanner });
 };
 
 export async function updateOrganizationProfile(
@@ -69,15 +87,23 @@ export async function updateOrganizationProfile(
       throw new ErrorWithCode(ErrorCode.Forbidden, "You do not have permission to update this organization");
     }
 
+    // The form sends freshly picked images as base64 data URLs. Storing those directly would
+    // put megabytes in the Team row and ship them again on every page that reads the branding,
+    // so hand them to the avatar store and keep only its short URL.
+    const [logoUrl, bannerUrl] = await Promise.all([
+      storeImageIfUploaded({ teamId: organizationId, value: input.logoUrl, isBanner: false }),
+      storeImageIfUploaded({ teamId: organizationId, value: input.bannerUrl, isBanner: true }),
+    ]);
+
     const organization = await prisma.team.update({
       where: {
         id: organizationId,
       },
       data: {
         name: input.name,
-        logoUrl: normalizeOptionalText(input.logoUrl),
+        logoUrl,
         bio: normalizeOptionalText(input.bio),
-        bannerUrl: normalizeOptionalText(input.bannerUrl),
+        bannerUrl,
       },
       select: {
         slug: true,
