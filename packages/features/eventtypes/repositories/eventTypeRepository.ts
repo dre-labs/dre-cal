@@ -287,6 +287,13 @@ export class EventTypeRepository implements IEventTypesRepository {
             {
               profileId,
             },
+            // Event types the user already had when they joined the organization carry no
+            // profile, and upstream only surfaces those for users it migrated into an
+            // organization. Without this they vanish from the owner's event types page.
+            {
+              userId,
+              profileId: null,
+            },
             // Fetch children event-types by userId because profileId is wrong
             {
               userId: userId,
@@ -398,6 +405,12 @@ export class EventTypeRepository implements IEventTypesRepository {
           OR: [
             {
               profileId,
+            },
+            // See findAllByUpId: event types predating the user's organization membership
+            // carry no profile and would otherwise be invisible to their owner.
+            {
+              userId,
+              profileId: null,
             },
             // Fetch children event-types by userId because profileId is wrong
             {
