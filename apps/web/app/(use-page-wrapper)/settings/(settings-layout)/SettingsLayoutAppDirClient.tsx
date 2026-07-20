@@ -138,6 +138,11 @@ const getTabs = (
           href: "/settings/organizations/profile",
           trackingMetadata: { section: "organization", page: "profile" },
         },
+        {
+          name: "members",
+          href: "/settings/organizations/members",
+          trackingMetadata: { section: "organization", page: "members" },
+        },
       ],
     },
     {
