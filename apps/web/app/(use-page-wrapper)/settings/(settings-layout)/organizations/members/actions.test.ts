@@ -37,10 +37,13 @@ const messageFrom = (response: { headers: Headers }) => {
   return location.searchParams.get("error") ?? location.searchParams.get("success") ?? "";
 };
 
-const formRequest = (fields: Record<string, string>): Request => {
+const formRequest = (fields: Record<string, string>, origin = "http://app.cal.local:3000"): Request => {
   const formData = new FormData();
   for (const [key, value] of Object.entries(fields)) formData.set(key, value);
-  return { formData: async () => formData } as unknown as Request;
+  return {
+    formData: async () => formData,
+    headers: new Headers(origin ? { origin } : {}),
+  } as unknown as Request;
 };
 
 const asOrgAdmin = (role: MembershipRole = MembershipRole.OWNER) => {
@@ -123,6 +126,16 @@ describe("addOrganizationMemberAction", () => {
     expect(response.headers.get("location")).toContain("/settings/organizations/profile");
     expect(mockedPrisma.profile.create).not.toHaveBeenCalled();
   });
+
+  it("rejects a cross-origin submission before touching the session", async () => {
+    const response = await addOrganizationMemberAction(
+      formRequest({ email: "attacker@evil.example.com" }, "https://evil.example.com")
+    );
+
+    expect(messageFrom(response)).toContain("could not be verified");
+    expect(mockedSession).not.toHaveBeenCalled();
+    expect(mockedPrisma.profile.create).not.toHaveBeenCalled();
+  });
 });
 
 describe("removeOrganizationMemberAction", () => {
@@ -156,6 +169,16 @@ describe("removeOrganizationMemberAction", () => {
     const response = await removeOrganizationMemberAction(formRequest({ membershipId: "12" }));
 
     expect(messageFrom(response)).toContain("last owner");
+    expect(mockedPrisma.membership.delete).not.toHaveBeenCalled();
+  });
+
+  it("rejects a cross-origin submission before touching the session", async () => {
+    const response = await removeOrganizationMemberAction(
+      formRequest({ membershipId: "12" }, "https://evil.example.com")
+    );
+
+    expect(messageFrom(response)).toContain("could not be verified");
+    expect(mockedSession).not.toHaveBeenCalled();
     expect(mockedPrisma.membership.delete).not.toHaveBeenCalled();
   });
 });

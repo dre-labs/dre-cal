@@ -4,6 +4,7 @@ import { WEBAPP_URL } from "@calcom/lib/constants";
 import { prisma } from "@calcom/prisma";
 import { MembershipRole, UserPermissionRole } from "@calcom/prisma/enums";
 import { buildLegacyRequest } from "@lib/buildLegacyCtx";
+import { isSameOriginRequest } from "@lib/isSameOriginRequest";
 import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -24,6 +25,10 @@ const formValue = (formData: FormData, key: string): string => {
 };
 
 export const createOrganizationAction = async (request: Request): Promise<NextResponse> => {
+  if (!isSameOriginRequest(request)) {
+    return redirectWithMessage(NEW_ORG_PATH, "error", "That request could not be verified. Try again.");
+  }
+
   const formData = await request.formData();
   const session = await getServerSession({ req: buildLegacyRequest(await headers(), await cookies()) });
   const user = session?.user;

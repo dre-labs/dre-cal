@@ -9,6 +9,7 @@ import { prisma } from "@calcom/prisma";
 import type { Prisma } from "@calcom/prisma/client";
 import { MembershipRole, SchedulingType } from "@calcom/prisma/enums";
 import { buildLegacyRequest } from "@lib/buildLegacyCtx";
+import { isSameOriginRequest } from "@lib/isSameOriginRequest";
 import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -169,6 +170,10 @@ const inviteNewTeamMemberByEmail = async ({
 };
 
 export const createTeamAction = async (request: Request): Promise<NextResponse> => {
+  if (!isSameOriginRequest(request)) {
+    return redirectWithMessage(request, "/teams", "error", "That request could not be verified. Try again.");
+  }
+
   const formData = await request.formData();
   const userId = await getCurrentUserId();
   if (!userId) return redirectTo(request, "/auth/login");
@@ -220,6 +225,10 @@ export const createTeamAction = async (request: Request): Promise<NextResponse> 
 };
 
 export const addTeamMemberAction = async (request: Request): Promise<NextResponse> => {
+  if (!isSameOriginRequest(request)) {
+    return redirectWithMessage(request, "/teams", "error", "That request could not be verified. Try again.");
+  }
+
   const formData = await request.formData();
   const userId = await getCurrentUserId();
   if (!userId) return redirectTo(request, "/auth/login");
@@ -302,6 +311,10 @@ export const addTeamMemberAction = async (request: Request): Promise<NextRespons
 };
 
 export const createTeamEventAction = async (request: Request): Promise<NextResponse> => {
+  if (!isSameOriginRequest(request)) {
+    return redirectWithMessage(request, "/teams", "error", "That request could not be verified. Try again.");
+  }
+
   const formData = await request.formData();
   const userId = await getCurrentUserId();
   if (!userId) return redirectTo(request, "/auth/login");
@@ -430,6 +443,10 @@ const revalidateTeam = (teamId: number, slug: string | null): void => {
 };
 
 export const updateTeamMemberRoleAction = async (request: Request): Promise<NextResponse> => {
+  if (!isSameOriginRequest(request)) {
+    return redirectWithMessage(request, "/teams", "error", "That request could not be verified. Try again.");
+  }
+
   const formData = await request.formData();
   const userId = await getCurrentUserId();
   if (!userId) return redirectTo(request, "/auth/login");
@@ -480,6 +497,10 @@ export const updateTeamMemberRoleAction = async (request: Request): Promise<Next
 };
 
 export const removeTeamMemberAction = async (request: Request): Promise<NextResponse> => {
+  if (!isSameOriginRequest(request)) {
+    return redirectWithMessage(request, "/teams", "error", "That request could not be verified. Try again.");
+  }
+
   const formData = await request.formData();
   const userId = await getCurrentUserId();
   if (!userId) return redirectTo(request, "/auth/login");

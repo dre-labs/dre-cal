@@ -5,6 +5,7 @@ import { prisma } from "@calcom/prisma";
 import type { Prisma } from "@calcom/prisma/client";
 import { MembershipRole } from "@calcom/prisma/enums";
 import { buildLegacyRequest } from "@lib/buildLegacyCtx";
+import { isSameOriginRequest } from "@lib/isSameOriginRequest";
 import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -75,6 +76,10 @@ const requireOrgAdmin = async (): Promise<OrgAdminContext | null> => {
 };
 
 export const addOrganizationMemberAction = async (request: Request): Promise<NextResponse> => {
+  if (!isSameOriginRequest(request)) {
+    return redirectWithMessage("error", "That request could not be verified. Try again.");
+  }
+
   const formData = await request.formData();
   const actor = await requireOrgAdmin();
   if (!actor) {
@@ -165,6 +170,10 @@ export const addOrganizationMemberAction = async (request: Request): Promise<Nex
 };
 
 export const removeOrganizationMemberAction = async (request: Request): Promise<NextResponse> => {
+  if (!isSameOriginRequest(request)) {
+    return redirectWithMessage("error", "That request could not be verified. Try again.");
+  }
+
   const formData = await request.formData();
   const actor = await requireOrgAdmin();
   if (!actor) {
