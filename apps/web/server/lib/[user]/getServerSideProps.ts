@@ -18,6 +18,7 @@ import { handleOrgRedirect } from "@lib/handleOrgRedirect";
 import type { EmbedProps } from "app/WithEmbedSSR";
 import type { GetServerSideProps } from "next";
 import type { z } from "zod";
+import { getOrgProfileForUser } from "./enrichProfileWithOrganization";
 
 const log = logger.getSubLogger({ prefix: ["[[pages/[user]]]"] });
 type UserPageProps = {
@@ -133,7 +134,13 @@ export const getServerSideProps: GetServerSideProps<UserPageProps> = async (cont
 
   const [user] = usersInOrgContext; //to be used when dealing with single user, not dynamic group
 
-  const branding = getBrandingForUser({ user });
+  // Must run after the non-org-user guard above, which 404s when every matched user already
+  // has an organization. Enriching earlier would hide org members' pages entirely.
+  const orgProfile = await getOrgProfileForUser(user);
+  const userWithOrgProfile = orgProfile ? { ...user, profile: orgProfile } : user;
+  const organization = userWithOrgProfile.profile.organization;
+
+  const branding = getBrandingForUser({ user: userWithOrgProfile });
 
   const profile = {
     name: user.name || user.username || "",
@@ -146,17 +153,17 @@ export const getServerSideProps: GetServerSideProps<UserPageProps> = async (cont
     darkBrandColor: branding.darkBrandColor ?? DEFAULT_DARK_BRAND_COLOR,
     allowSEOIndexing: user.allowSEOIndexing ?? true,
     username: user.username,
-    organization: user.profile.organization
+    organization: organization
       ? {
           requestedSlug: null,
-          slug: user.profile.organization.slug,
-          id: user.profile.organization.id,
-          name: user.profile.organization.name,
-          logoUrl: user.profile.organization.logoUrl,
-          bannerUrl: user.profile.organization.bannerUrl,
-          brandColor: user.profile.organization.brandColor,
-          darkBrandColor: user.profile.organization.darkBrandColor,
-          theme: user.profile.organization.theme,
+          slug: organization.slug,
+          id: organization.id,
+          name: organization.name,
+          logoUrl: organization.logoUrl,
+          bannerUrl: organization.bannerUrl,
+          brandColor: organization.brandColor,
+          darkBrandColor: organization.darkBrandColor,
+          theme: organization.theme,
         }
       : null,
   };
@@ -186,7 +193,7 @@ export const getServerSideProps: GetServerSideProps<UserPageProps> = async (cont
   const safeBio = markdownToSafeHTML(user.bio) || "";
 
   const markdownStrippedBio = stripMarkdown(user?.bio || "");
-  const org = usersInOrgContext[0].profile.organization;
+  const org = organization;
   const orgProfileDetails = org?.id
     ? await prisma.team.findUnique({
         where: {
@@ -200,14 +207,17 @@ export const getServerSideProps: GetServerSideProps<UserPageProps> = async (cont
 
   return {
     props: {
-      users: usersInOrgContext.map((user) => ({
-        name: user.name,
-        username: user.username,
-        bio: user.bio,
-        avatarUrl: user.avatarUrl,
-        verified: user.verified,
-        profile: user.profile,
-      })),
+      // Dynamic groups redirect above, so this is always the single enriched user.
+      users: [
+        {
+          name: userWithOrgProfile.name,
+          username: userWithOrgProfile.username,
+          bio: userWithOrgProfile.bio,
+          avatarUrl: userWithOrgProfile.avatarUrl,
+          verified: userWithOrgProfile.verified,
+          profile: userWithOrgProfile.profile,
+        },
+      ],
       entity: {
         ...(org?.logoUrl ? { logoUrl: org?.logoUrl } : {}),
         considerUnpublished: !isARedirectFromNonOrgLink && org?.slug === null,
