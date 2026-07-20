@@ -282,6 +282,36 @@ export async function getEventTypeHosts({
   };
 }
 
+/**
+ * Matches the user who owns the event behind a public booking link.
+ *
+ * On an organization domain the username is scoped to that organization's profiles. Off it,
+ * upstream additionally requires the user to hold no profile at all, because there an
+ * organization member is reachable on their organization's own domain instead. This
+ * deployment serves every user from one domain, so that extra condition would 404 a
+ * member's booking pages the moment they join an organization.
+ */
+export const buildEventOwnerWhere = ({
+  username,
+  orgQuery,
+}: {
+  username: string;
+  orgQuery: Prisma.TeamWhereInput | null;
+}): Prisma.UserWhereInput =>
+  orgQuery
+    ? {
+        profiles: {
+          some: {
+            organization: orgQuery,
+            username,
+          },
+        },
+      }
+    : {
+        username,
+        organization: null,
+      };
+
 // TODO: Convert it to accept a single parameter with structured data
 export const getPublicEvent = async (
   username: string,
@@ -409,21 +439,7 @@ export const getPublicEvent = async (
       }
     : {
         users: {
-          some: {
-            ...(orgQuery
-              ? {
-                  profiles: {
-                    some: {
-                      organization: orgQuery,
-                      username: username,
-                    },
-                  },
-                }
-              : {
-                  username,
-                  profiles: { none: {} },
-                }),
-          },
+          some: buildEventOwnerWhere({ username, orgQuery }),
         },
         team: null,
       };
