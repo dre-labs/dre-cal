@@ -1,8 +1,7 @@
 "use client";
 
-import { HAS_ORG_OPT_IN_FEATURES } from "@calcom/features/feature-opt-in/config";
 import type { TeamFeatures } from "@calcom/features/flags/config";
-import { IS_CALCOM, WEBAPP_URL } from "@calcom/lib/constants";
+import { IS_CALCOM } from "@calcom/lib/constants";
 import { getPlaceholderAvatar } from "@calcom/lib/defaultAvatarImage";
 import { getUserAvatarUrl } from "@calcom/lib/getAvatarUrl";
 import { useIsStandalone } from "@calcom/lib/hooks/useIsStandalone";
@@ -128,6 +127,9 @@ const getTabs = (
       ],
     },
     {
+      // Only pages that exist in this fork are listed. Upstream's other organization
+      // settings pages were removed with the enterprise features, so linking them here
+      // would send admins to 404s.
       name: "organization",
       href: "/settings/organizations",
       children: [
@@ -136,54 +138,6 @@ const getTabs = (
           href: "/settings/organizations/profile",
           trackingMetadata: { section: "organization", page: "profile" },
         },
-        {
-          name: "general",
-          href: "/settings/organizations/general",
-          trackingMetadata: { section: "organization", page: "general" },
-        },
-        {
-          name: "guest_notifications",
-          href: "/settings/organizations/guest-notifications",
-        },
-        ...(orgBranding
-          ? [
-              {
-                name: "members",
-                href: `${WEBAPP_URL}/settings/organizations/${orgBranding?.slug}/members`,
-                isExternalLink: true,
-                trackingMetadata: { section: "organization", page: "members" },
-              },
-            ]
-          : []),
-        {
-          name: "privacy_and_security",
-          href: "/settings/organizations/privacy",
-          trackingMetadata: { section: "organization", page: "privacy_and_security" },
-        },
-        {
-          name: "SSO",
-          href: "/settings/organizations/sso",
-          trackingMetadata: { section: "organization", page: "sso" },
-        },
-        {
-          name: "directory_sync",
-          href: "/settings/organizations/dsync",
-          trackingMetadata: { section: "organization", page: "directory_sync" },
-        },
-        {
-          name: "api_docs",
-          href: "/docs",
-          trackingMetadata: { section: "organization", page: "api_docs" },
-        },
-        ...(HAS_ORG_OPT_IN_FEATURES
-          ? [
-              {
-                name: "features",
-                href: "/settings/organizations/features",
-                trackingMetadata: { section: "organization", page: "features" },
-              },
-            ]
-          : []),
       ],
     },
     {
@@ -376,6 +330,11 @@ const useTabs = ({
 
     // check if name is in adminRequiredKeys
     return processedTabs.filter((tab) => {
+      // Matched on href because the organization tab is renamed to the org's own name above.
+      // Every organization settings page requires admin/owner rights, so members would only
+      // get 404s from these links.
+      if (tab.href === "/settings/organizations")
+        return !!orgBranding && !!permissions?.canUpdateOrganization;
       if (organizationRequiredKeys.includes(tab.name)) return !!orgBranding;
       if (tab.name === "other_teams" && !permissions?.canUpdateOrganization) return false;
 
