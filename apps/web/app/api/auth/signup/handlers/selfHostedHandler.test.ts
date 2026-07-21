@@ -1,15 +1,15 @@
-import type { Mock } from "vitest";
-import { vi } from "vitest";
-
 import {
   prismaMock,
   resetPrismaMock,
 } from "@calcom/features/auth/signup/handlers/__tests__/mocks/prisma.mocks";
-import {
-  createMockTeam,
-  createMockFoundToken,
-} from "@calcom/features/auth/signup/handlers/__tests__/mocks/signup.factories";
 import type { SignupBody } from "@calcom/features/auth/signup/handlers/__tests__/mocks/signup.factories";
+import {
+  createMockFoundToken,
+  createMockTeam,
+  createSignupBody,
+} from "@calcom/features/auth/signup/handlers/__tests__/mocks/signup.factories";
+import type { Mock } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockFindTokenByToken: Mock = vi.fn();
 const mockValidateAndGetCorrectedUsernameForTeam: Mock = vi.fn();
@@ -58,8 +58,9 @@ vi.mock("@calcom/features/auth/signup/utils/token", () => ({
 }));
 
 // Import after mocks
-import handler from "./selfHostedHandler";
+import { sendEmailVerification } from "@calcom/features/auth/lib/verifyEmail";
 import { runP2002TestSuite } from "@calcom/features/auth/signup/handlers/__tests__/p2002.test-suite";
+import handler from "./selfHostedHandler";
 
 function callHandler(body: SignupBody): ReturnType<typeof handler> {
   return handler(body as unknown as Record<string, string>);
@@ -72,4 +73,57 @@ runP2002TestSuite("selfHostedHandler", callHandler, () => {
   mockValidateAndGetCorrectedUsernameForTeam.mockResolvedValue("testuser");
   prismaMock.team.findUnique.mockResolvedValue(createMockTeam() as never);
   prismaMock.verificationToken.delete.mockResolvedValue({} as never);
+});
+
+describe("selfHostedHandler – tokenless signup for an invited email", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetPrismaMock();
+  });
+
+  it("claims the invite stub instead of colliding on the email", async () => {
+    prismaMock.user.findFirst.mockResolvedValue({ id: 7, invitedTo: 1 } as never);
+    prismaMock.user.update.mockResolvedValue({ id: 7 } as never);
+
+    const response = await callHandler(createSignupBody({ email: "invited@example.com" }));
+
+    expect(response.status).toBe(201);
+    expect(prismaMock.user.create).not.toHaveBeenCalled();
+    expect(prismaMock.user.update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 7 } }));
+  });
+
+  it("provisions the default availability the stub never got", async () => {
+    prismaMock.user.findFirst.mockResolvedValue({ id: 7, invitedTo: 1 } as never);
+    prismaMock.user.update.mockResolvedValue({ id: 7 } as never);
+    prismaMock.schedule.findFirst.mockResolvedValue(null as never);
+
+    await callHandler(createSignupBody({ email: "invited@example.com" }));
+
+    expect(prismaMock.schedule.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ userId: 7 }) })
+    );
+  });
+
+  it("leaves the membership pending — it is accepted on email verification", async () => {
+    prismaMock.user.findFirst.mockResolvedValue({ id: 7, invitedTo: 1 } as never);
+    prismaMock.user.update.mockResolvedValue({ id: 7 } as never);
+
+    await callHandler(createSignupBody({ email: "invited@example.com" }));
+
+    expect(prismaMock.membership.updateMany).not.toHaveBeenCalled();
+    expect(sendEmailVerification).toHaveBeenCalledWith(
+      expect.objectContaining({ email: "invited@example.com" })
+    );
+  });
+
+  it("still creates a fresh user when no invite exists", async () => {
+    prismaMock.user.findFirst.mockResolvedValue(null as never);
+    prismaMock.user.create.mockResolvedValue({ id: 9 } as never);
+
+    const response = await callHandler(createSignupBody());
+
+    expect(response.status).toBe(201);
+    expect(prismaMock.user.create).toHaveBeenCalled();
+    expect(prismaMock.user.update).not.toHaveBeenCalled();
+  });
 });

@@ -10,23 +10,22 @@ import {
   validateAndGetCorrectedUsernameForTeam,
 } from "@calcom/features/auth/signup/utils/token";
 import { validateAndGetCorrectedUsernameAndEmail } from "@calcom/features/auth/signup/utils/validateUsername";
+import { getUserRepository } from "@calcom/features/di/containers/UserRepository";
 import { hashPassword } from "@calcom/lib/auth/hashPassword";
-
 import logger from "@calcom/lib/logger";
 import { isPrismaError } from "@calcom/lib/server/getServerErrorFromUnknown";
+import { isUniqueConstraintOn } from "@calcom/lib/server/prismaUniqueConstraint";
 import { isUsernameReservedDueToMigration } from "@calcom/lib/server/username";
 import slugify from "@calcom/lib/slugify";
 import { prisma } from "@calcom/prisma";
-import { IdentityProvider } from "@calcom/prisma/enums";
+import { CreationSource, IdentityProvider } from "@calcom/prisma/enums";
 import { signupSchema } from "@calcom/prisma/zod-utils";
 import { NextResponse } from "next/server";
-import { getUserRepository } from "@calcom/features/di/containers/UserRepository";
-import { CreationSource } from "@calcom/prisma/enums";
 
 export default async function handler(body: Record<string, string>) {
   const { email, password, language, token } = signupSchema.parse(body);
 
-  const userRepository = getUserRepository()
+  const userRepository = getUserRepository();
 
   const username = slugify(body.username);
   const userEmail = email.toLowerCase();
@@ -49,8 +48,8 @@ export default async function handler(body: Record<string, string>) {
 
     if (foundToken?.teamId) {
       const existingUser = await userRepository.findByEmailWithInvitedTo({
-        email: userEmail
-      })
+        email: userEmail,
+      });
 
       if (existingUser && existingUser.invitedTo !== foundToken.teamId) {
         return NextResponse.json({ message: SIGNUP_ERROR_CODES.USER_ALREADY_EXISTS }, { status: 409 });
@@ -107,8 +106,8 @@ export default async function handler(body: Record<string, string>) {
       const existingUserByUsername = await userRepository.findByUsernameAndOrganizationId({
         username: correctedUsername,
         organizationId,
-        excludeEmail: userEmail
-      })
+        excludeEmail: userEmail,
+      });
 
       if (existingUserByUsername) {
         return NextResponse.json({ message: SIGNUP_ERROR_CODES.USER_ALREADY_EXISTS }, { status: 409 });
@@ -122,17 +121,18 @@ export default async function handler(body: Record<string, string>) {
           hashedPassword,
           organizationId,
           emailVerified: new Date(Date.now()),
-          identityProvider: IdentityProvider.CAL
-        })
+          identityProvider: IdentityProvider.CAL,
+        });
       } catch (error) {
-        if (isPrismaError(error) && error.code === "P2002") {
-          const target = String(error.meta?.target ?? "");
-          if (target.includes("email") || target.includes("username")) {
-            return NextResponse.json({ message: SIGNUP_ERROR_CODES.USER_ALREADY_EXISTS }, { status: 409 });
-          }
+        if (isPrismaError(error) && isUniqueConstraintOn(error, ["email", "username"])) {
+          return NextResponse.json({ message: SIGNUP_ERROR_CODES.USER_ALREADY_EXISTS }, { status: 409 });
         }
         throw error;
       }
+
+      // upsertForSignup writes over an invite stub, which never got the default availability that
+      // `create` provisions for a normal signup.
+      await userRepository.ensureDefaultSchedule({ userId: user.id });
 
       await createOrUpdateMemberships({
         user,
@@ -159,25 +159,38 @@ export default async function handler(body: Record<string, string>) {
     if (!isUsernameAvailable) {
       return NextResponse.json({ message: "A user exists with that username" }, { status: 409 });
     }
-    try {
-      await userRepository.create({
+    // Someone who was invited to a team but signed up directly instead of using the emailed link
+    // still has an invite stub holding their email address. Take it over rather than colliding on
+    // the email unique constraint — their pending memberships are accepted once they verify.
+    const unclaimedInvite = await userRepository.findUnclaimedInviteByEmail({ email: userEmail });
+
+    if (unclaimedInvite) {
+      await userRepository.claimInvite({
+        userId: unclaimedInvite.id,
         username: correctedUsername,
-        email: userEmail,
         hashedPassword,
-        organizationId: null,
         creationSource: CreationSource.WEBAPP,
         identityProvider: IdentityProvider.CAL,
-        locked: false
-      })
-    } catch (error) {
-      // Fallback for race conditions where user was created between our check and create
-      if (isPrismaError(error) && error.code === "P2002") {
-        const target = String(error.meta?.target ?? "");
-        if (target.includes("email") || target.includes("username")) {
+      });
+      await userRepository.ensureDefaultSchedule({ userId: unclaimedInvite.id });
+    } else {
+      try {
+        await userRepository.create({
+          username: correctedUsername,
+          email: userEmail,
+          hashedPassword,
+          organizationId: null,
+          creationSource: CreationSource.WEBAPP,
+          identityProvider: IdentityProvider.CAL,
+          locked: false,
+        });
+      } catch (error) {
+        // Fallback for race conditions where user was created between our check and create
+        if (isPrismaError(error) && isUniqueConstraintOn(error, ["email", "username"])) {
           return NextResponse.json({ message: SIGNUP_ERROR_CODES.USER_ALREADY_EXISTS }, { status: 409 });
         }
+        throw error;
       }
-      throw error;
     }
 
     if (process.env.AVATARAPI_USERNAME && process.env.AVATARAPI_PASSWORD) {

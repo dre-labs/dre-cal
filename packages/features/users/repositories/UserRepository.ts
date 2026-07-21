@@ -9,8 +9,7 @@ import type { PrismaClient } from "@calcom/prisma";
 import { availabilityUserSelect } from "@calcom/prisma";
 import type { DestinationCalendar, SelectedCalendar, User as UserType } from "@calcom/prisma/client";
 import { Prisma } from "@calcom/prisma/client";
-import type { IdentityProvider } from "@calcom/prisma/enums";
-import type { CreationSource } from "@calcom/prisma/enums";
+import type { CreationSource, IdentityProvider } from "@calcom/prisma/enums";
 import { BookingStatus, MembershipRole } from "@calcom/prisma/enums";
 import { credentialForCalendarServiceSelect } from "@calcom/prisma/selects/credential";
 import { userSelect as prismaUserSelect } from "@calcom/prisma/selects/user";
@@ -1419,7 +1418,7 @@ export class UserRepository {
     });
   }
 
-  async deleteMany({ userIds }: {userIds: number[]}){
+  async deleteMany({ userIds }: { userIds: number[] }) {
     await this.prismaClient.user.deleteMany({
       where: {
         id: { in: userIds },
@@ -1488,15 +1487,100 @@ export class UserRepository {
     });
   }
 
-  async findByEmailWithInvitedTo({ email }: { email: string } ) {
+  /**
+   * An invite stub is the passwordless, unverified placeholder row that team invites create so the
+   * pending membership has something to hang off of (see inviteNewTeamMemberByEmail). It owns the
+   * email address but nobody has ever authenticated as it, so a signup for the same address is
+   * allowed to take it over rather than colliding on the email unique constraint.
+   *
+   * The password/emailVerified checks are what keep a real account from being claimed: any account
+   * that has been logged into has one or the other set.
+   */
+  async findUnclaimedInviteByEmail({ email }: { email: string }) {
+    return this.prismaClient.user.findFirst({
+      where: {
+        email: email.toLowerCase(),
+        emailVerified: null,
+        password: { is: null },
+        OR: [{ invitedTo: { not: null } }, { teams: { some: { accepted: false } } }],
+      },
+      select: { id: true, invitedTo: true },
+    });
+  }
+
+  async claimInvite({
+    userId,
+    username,
+    hashedPassword,
+    creationSource,
+    identityProvider,
+  }: {
+    userId: number;
+    username: string;
+    hashedPassword: string;
+    creationSource: CreationSource;
+    identityProvider: IdentityProvider;
+  }) {
+    return this.prismaClient.user.update({
+      where: { id: userId },
+      data: {
+        username,
+        creationSource,
+        identityProvider,
+        password: {
+          upsert: {
+            create: { hash: hashedPassword },
+            update: { hash: hashedPassword },
+          },
+        },
+      },
+      select: { id: true },
+    });
+  }
+
+  /**
+   * Invite stubs are created bare, so unlike `create` they never got the default availability that
+   * every other signup path provisions. Without this an invited user's event types have no bookable
+   * hours at all.
+   */
+  async ensureDefaultSchedule({ userId }: { userId: number }) {
+    const existing = await this.prismaClient.schedule.findFirst({
+      where: { userId },
+      select: { id: true },
+    });
+
+    if (existing) return existing;
+
+    const t = await getTranslation("en", "common");
+    const availability = getAvailabilityFromSchedule(DEFAULT_SCHEDULE);
+
+    return this.prismaClient.schedule.create({
+      data: {
+        userId,
+        name: t("default_schedule_name"),
+        availability: {
+          createMany: {
+            data: availability.map((schedule) => ({
+              days: schedule.days,
+              startTime: schedule.startTime,
+              endTime: schedule.endTime,
+            })),
+          },
+        },
+      },
+      select: { id: true },
+    });
+  }
+
+  async findByEmailWithInvitedTo({ email }: { email: string }) {
     return this.prismaClient.user.findUnique({
       where: {
-        email: email.toLowerCase()
+        email: email.toLowerCase(),
       },
       select: {
-        invitedTo: true
-      }
-    })
+        invitedTo: true,
+      },
+    });
   }
 
   async findByUsernameAndOrganizationId({
@@ -1504,20 +1588,20 @@ export class UserRepository {
     organizationId,
     excludeEmail,
   }: {
-    username: string,
-    organizationId: number | null,
-    excludeEmail: string
+    username: string;
+    organizationId: number | null;
+    excludeEmail: string;
   }) {
     return this.prismaClient.user.findFirst({
       where: {
         username,
         organizationId,
-        NOT: { email: excludeEmail }
+        NOT: { email: excludeEmail },
       },
       select: {
-        id: true
-      }
-    })
+        id: true,
+      },
+    });
   }
 
   async lockByEmail({ email }: { email: string }) {
@@ -1602,26 +1686,26 @@ export class UserRepository {
     const trimmedSearchTerm = searchTerm?.trim();
     const searchFilters: Prisma.UserWhereInput = trimmedSearchTerm
       ? {
-        AND: [
-          // To bypass the excludeLockedUsersExtension
-          bothLockedAndUnlockedWhere,
-          {
-            OR: [
-              { email: { contains: trimmedSearchTerm, mode: "insensitive" } },
-              { username: { contains: trimmedSearchTerm, mode: "insensitive" } },
-              {
-                profiles: {
-                  some: {
-                    username: { contains: trimmedSearchTerm, mode: "insensitive" },
+          AND: [
+            // To bypass the excludeLockedUsersExtension
+            bothLockedAndUnlockedWhere,
+            {
+              OR: [
+                { email: { contains: trimmedSearchTerm, mode: "insensitive" } },
+                { username: { contains: trimmedSearchTerm, mode: "insensitive" } },
+                {
+                  profiles: {
+                    some: {
+                      username: { contains: trimmedSearchTerm, mode: "insensitive" },
+                    },
                   },
                 },
-              },
-            ],
-          },
-        ],
-      }
-      // To bypass the excludeLockedUsersExtension
-      : bothLockedAndUnlockedWhere;
+              ],
+            },
+          ],
+        }
+      : // To bypass the excludeLockedUsersExtension
+        bothLockedAndUnlockedWhere;
 
     const hasLimit = limit !== undefined && limit !== null;
     const take = hasLimit ? limit + 1 : undefined; // +1 lets us detect "has more" for the cursor
