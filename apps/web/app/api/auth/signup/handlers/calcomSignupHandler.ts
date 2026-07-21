@@ -23,6 +23,7 @@ import { WEBAPP_URL } from "@calcom/lib/constants";
 import { HttpError } from "@calcom/lib/http-error";
 import logger from "@calcom/lib/logger";
 import { isPrismaError } from "@calcom/lib/server/getServerErrorFromUnknown";
+import { isUniqueConstraintOn } from "@calcom/lib/server/prismaUniqueConstraint";
 import type { CustomNextApiHandler } from "@calcom/lib/server/username";
 import { usernameHandler } from "@calcom/lib/server/username";
 import { getTrackingFromCookies } from "@calcom/lib/tracking";
@@ -45,9 +46,7 @@ const billingService = {
   async createCustomer(_args: Record<string, unknown>): Promise<{ stripeCustomerId: string }> {
     return { stripeCustomerId: "" };
   },
-  async createSubscriptionCheckout(
-    _args: Record<string, unknown>
-  ): Promise<{ sessionId: string }> {
+  async createSubscriptionCheckout(_args: Record<string, unknown>): Promise<{ sessionId: string }> {
     return { sessionId: "" };
   },
 };
@@ -105,7 +104,7 @@ const handler: CustomNextApiHandler = async (body, usernameStatus, query) => {
     });
 
     if (foundToken?.teamId) {
-      const existingUser = await userRepository.findByEmailWithInvitedTo({email})
+      const existingUser = await userRepository.findByEmailWithInvitedTo({ email });
 
       if (existingUser && existingUser.invitedTo !== foundToken.teamId) {
         return NextResponse.json({ message: SIGNUP_ERROR_CODES.USER_ALREADY_EXISTS }, { status: 409 });
@@ -200,8 +199,8 @@ const handler: CustomNextApiHandler = async (body, usernameStatus, query) => {
         const existingUserByUsername = await userRepository.findByUsernameAndOrganizationId({
           username,
           organizationId,
-          excludeEmail: email
-        })
+          excludeEmail: email,
+        });
         if (existingUserByUsername) {
           return NextResponse.json({ message: SIGNUP_ERROR_CODES.USER_ALREADY_EXISTS }, { status: 409 });
         }
@@ -215,14 +214,11 @@ const handler: CustomNextApiHandler = async (body, usernameStatus, query) => {
           hashedPassword,
           organizationId,
           emailVerified: new Date(),
-          identityProvider: IdentityProvider.CAL
-        })
+          identityProvider: IdentityProvider.CAL,
+        });
       } catch (error) {
-        if (isPrismaError(error) && error.code === "P2002") {
-          const target = String(error.meta?.target ?? "");
-          if (target.includes("email") || target.includes("username")) {
-            return NextResponse.json({ message: SIGNUP_ERROR_CODES.USER_ALREADY_EXISTS }, { status: 409 });
-          }
+        if (isPrismaError(error) && isUniqueConstraintOn(error, ["email", "username"])) {
+          return NextResponse.json({ message: SIGNUP_ERROR_CODES.USER_ALREADY_EXISTS }, { status: 409 });
         }
         throw error;
       }
@@ -261,15 +257,12 @@ const handler: CustomNextApiHandler = async (body, usernameStatus, query) => {
         metadata: {
           stripeCustomerId: customer.stripeCustomerId,
           checkoutSessionId,
-        }
-      })
+        },
+      });
     } catch (error) {
       // Fallback for race conditions where user was created between our check and create
-      if (isPrismaError(error) && error.code === "P2002") {
-        const target = String(error.meta?.target ?? "");
-        if (target.includes("email") || target.includes("username")) {
-          return NextResponse.json({ message: SIGNUP_ERROR_CODES.USER_ALREADY_EXISTS }, { status: 409 });
-        }
+      if (isPrismaError(error) && isUniqueConstraintOn(error, ["email", "username"])) {
+        return NextResponse.json({ message: SIGNUP_ERROR_CODES.USER_ALREADY_EXISTS }, { status: 409 });
       }
       throw error;
     }

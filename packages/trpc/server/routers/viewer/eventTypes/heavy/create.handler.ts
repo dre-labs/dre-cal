@@ -1,6 +1,7 @@
 import { getDefaultLocations } from "@calcom/app-store/_utils/getDefaultLocations";
 import { DailyLocationType } from "@calcom/app-store/constants";
 import { EventTypeRepository } from "@calcom/features/eventtypes/repositories/eventTypeRepository";
+import { isUniqueConstraintOn } from "@calcom/lib/server/prismaUniqueConstraint";
 import type { PrismaClient } from "@calcom/prisma";
 import { Prisma } from "@calcom/prisma/client";
 import { MembershipRole, SchedulingType } from "@calcom/prisma/enums";
@@ -12,9 +13,15 @@ import type { TCreateInputSchema } from "./create.schema";
 
 class PermissionCheckService {
   constructor(_prisma?: unknown) {}
-  async checkPermission(..._args: unknown[]) { return true; }
-  async hasPermission(..._args: unknown[]) { return true; }
-  async getTeamIdsWithPermission(..._args: unknown[]): Promise<number[]> { return []; }
+  async checkPermission(..._args: unknown[]) {
+    return true;
+  }
+  async hasPermission(..._args: unknown[]) {
+    return true;
+  }
+  async getTeamIdsWithPermission(..._args: unknown[]): Promise<number[]> {
+    return [];
+  }
 }
 
 type EventTypeLocation = z.infer<typeof eventTypeLocations>[number];
@@ -158,7 +165,7 @@ export const createHandler = async ({ ctx, input }: CreateOptions) => {
   } catch (e) {
     console.warn(e);
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
-      if (e.code === "P2002" && Array.isArray(e.meta?.target) && e.meta?.target.includes("slug")) {
+      if (isUniqueConstraintOn(e, ["slug"])) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "URL Slug already exists for given user." });
       }
     }

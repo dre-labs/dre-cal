@@ -1,20 +1,18 @@
-import { describe, it, expect, beforeEach } from "vitest";
-
+import { beforeEach, describe, expect, it } from "vitest";
 import { SIGNUP_ERROR_CODES } from "../../constants";
 import type { MockResponse } from "./mocks/next.mocks";
 import {
-  prismaMock,
+  createGenericPrismaError,
+  createP2002DriverAdapterError,
   createP2002Error,
   createP2002ErrorWithoutTarget,
-  createGenericPrismaError,
+  prismaMock,
 } from "./mocks/prisma.mocks";
-import { createSignupBody, createMockUser } from "./mocks/signup.factories";
-
 import type { SignupBody } from "./mocks/signup.factories";
+import { createMockUser, createSignupBody } from "./mocks/signup.factories";
 
 type CallHandler = (body: SignupBody) => Promise<MockResponse>;
 
-// biome-ignore lint/complexity/noExcessiveLinesPerFunction: test suite contains multiple test cases
 export function runP2002TestSuite(
   handlerName: string,
   callHandler: CallHandler,
@@ -48,6 +46,20 @@ export function runP2002TestSuite(
 
       it("returns 409 when target is 'username' only", async () => {
         prismaMock.user.create.mockRejectedValue(createP2002Error(["username"]));
+
+        const response = await callHandler(createSignupBody());
+
+        expect(response.status).toBe(409);
+        expect(await response.json()).toEqual({
+          message: SIGNUP_ERROR_CODES.USER_ALREADY_EXISTS,
+        });
+      });
+
+      // Regression: production runs a driver adapter, which reports the constraint under
+      // meta.driverAdapterError instead of meta.target. Reading only meta.target turned an
+      // "email already taken" into a 500.
+      it("returns 409 when the driver adapter reports an 'email' constraint", async () => {
+        prismaMock.user.create.mockRejectedValue(createP2002DriverAdapterError(["email"]));
 
         const response = await callHandler(createSignupBody());
 

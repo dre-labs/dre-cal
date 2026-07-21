@@ -3,11 +3,12 @@ import { sendChangeOfEmailVerification } from "@calcom/features/auth/lib/verifyE
 import { FeaturesRepository } from "@calcom/features/flags/features.repository";
 import { checkUsername } from "@calcom/features/profile/lib/checkUsername";
 import { ScheduleRepository } from "@calcom/features/schedules/repositories/ScheduleRepository";
+import { getTranslation } from "@calcom/i18n/server";
 import hasKeyInMetadata from "@calcom/lib/hasKeyInMetadata";
 import { HttpError } from "@calcom/lib/http-error";
 import logger from "@calcom/lib/logger";
 import { uploadAvatar } from "@calcom/lib/server/avatar";
-import { getTranslation } from "@calcom/i18n/server";
+import { isUniqueConstraintOn } from "@calcom/lib/server/prismaUniqueConstraint";
 import { resizeBase64Image } from "@calcom/lib/server/resizeBase64Image";
 import slugify from "@calcom/lib/slugify";
 import { validateBookerLayouts } from "@calcom/lib/validateBookerLayouts";
@@ -24,7 +25,9 @@ import { type TUpdateProfileInputSchema, updateUserMetadataAllowedKeys } from ".
 const getBillingProviderService = async (..._args: unknown[]) => ({
   createCustomer: async (..._a: unknown[]) => null,
   getCustomer: async (..._a: unknown[]) => null,
-  getSubscriptions: async (..._a: unknown[]): Promise<{ items: { data: { price: { id: string } }[] }; status: string }[]> => [],
+  getSubscriptions: async (
+    ..._a: unknown[]
+  ): Promise<{ items: { data: { price: { id: string } }[] }; status: string }[]> => [],
   updateCustomer: async (..._a: unknown[]) => null,
 });
 const updateNewTeamMemberEventTypes = async (..._args: unknown[]) => {};
@@ -271,11 +274,8 @@ export const updateProfileHandler = async ({ ctx, input }: UpdateProfileOptions)
     });
   } catch (e) {
     // Catch unique constraint failure on email field.
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-      const meta = e.meta as { target: string[] };
-      if (meta.target.indexOf("email") !== -1) {
-        throw new HttpError({ statusCode: 409, message: "email_already_used" });
-      }
+    if (e instanceof Prisma.PrismaClientKnownRequestError && isUniqueConstraintOn(e, ["email"])) {
+      throw new HttpError({ statusCode: 409, message: "email_already_used" });
     }
     throw e; // make sure other errors are rethrown
   }
